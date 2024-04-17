@@ -23,13 +23,14 @@ def user_login(request):
                 if user.is_superuser:
                     login(request, user)
                     request.session['user_id'] = user.id
-                    # print(user)
+                    print(user)
                     return redirect("index")
 
                 else:
                     login(request, user)
                     # Set the user ID in the session
                     request.session['user_id'] = user.id
+                    print(user)
                     return redirect("index")
             else:
                 messages.error(request, 'Invalid email or password')

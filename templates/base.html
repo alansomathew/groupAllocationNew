@@ -92,12 +92,18 @@ Fixed Navigation
                             </a>
                             
                         </li>
+                        
+                        {% if user.is_authenticated %}
+                        <li class="nav-item ">
+                            <a class="nav-link" href="{% url 'logout'  %}">Logout</a>
+                        </li>
+                        {% else %}
                         <li class="nav-item ">
                             <a class="nav-link text-black" href="{% url 'login'  %}">Organiser</a>
                         </li>
-                        <!-- <li class="nav-item ">
-                            <a class="nav-link" href="service.html">Services</a>
-                        </li>
+                        {% endif %}
+
+                        <!-- 
                         <li class="nav-item ">
                             <a class="nav-link" href="portfolio.html">Portfolio</a>
                         </li>
