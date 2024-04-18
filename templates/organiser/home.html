@@ -10,49 +10,52 @@
 Start About Section
 ==================================== -->
 <section class="service-2 section">
-    <div class="container">
-      <div class="row justify-content-center">
-  
-        <div class="col-lg-6">
-          <!-- section title -->
-          <div class="title text-center">
-            <h2>Events</h2>
-            <p> </p>
-            <div class="border"></div>
-          </div>
-          <!-- /section title -->
+  <div class="container">
+    <div class="row justify-content-center">
+
+      <div class="col-lg-6">
+        <!-- section title -->
+        <div class="title text-center">
+          <h2>Events</h2>
+          <p> </p>
+          <div class="border"></div>
+        </div>
+        <!-- /section title -->
+      </div>
+    </div>
+    <div class="row">
+
+      <div class="col-md-4 text-center d-none d-md-block">
+        <!-- create new event -->
+        <div class="service-item">
+          <i class="tf-ion-android-add"></i>
+          <h3>Create New Event</h3>
+          <a href="{% url 'event' %}" class="btn btn-main">Create</a>
         </div>
       </div>
-      <div class="row">
-  
-        <div class="col-md-4 text-center d-none d-md-block">
-          <!-- create new event -->
+      <div class="col-md-8">
+        <div class="row text-center">
+          {% for event in events %}
+          <div class="col-md-6 col-sm-6">
             <div class="service-item">
-                <i class="tf-ion-android-add"></i>
-              <h3>Create New Event</h3>
-              <a href="" class="btn btn-main">Create</a>
+              <i class="tf-ion-ios-alarm-outline"></i>
+              <h4>{{event.name}}</h4>
+              <p>{{event.description}}</p>
+              <p>participants:{{event.participants}}</p>
             </div>
-        </div>
-        <div class="col-md-8">
-          <div class="row text-center">
-            <div class="col-md-6 col-sm-6">
-              <div class="service-item">
-                <i class="tf-ion-ios-alarm-outline"></i>
-                <h4>Event Name</h4>
-                <p></p>
-              </div>
-            </div><!-- END COL -->
-          
           </div>
+          {% endfor %}
+
         </div>
-      </div> <!-- End row -->
-    </div> <!-- End container -->
-  </section> <!-- End section -->
+      </div>
+    </div> <!-- End row -->
+  </div> <!-- End container -->
+</section> <!-- End section -->
 
 
-    {% endblock content %}
+{% endblock content %}
 
 
-    {% block javascripts %}
+{% block javascripts %}
 
-    {% endblock javascripts %}
+{% endblock javascripts %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!--
+Start About Section
+==================================== -->
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6">
+                <!-- section title -->
+                <div class="title text-center">
+                    <h2>Events</h2>
+                    <p> </p>
+                    <div class="border"></div>
+                </div>
+                <!-- /section title -->
+            </div>
+        </div>
+        <div class="row">
+
+          <div class="col-md-12">
+            <form action="" method="post">
+                {% csrf_token %}
+
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="nClass" name="fn" aria-label="Name" required />
+                    <label for="nClass">Name</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="nClass" name="ln" aria-label="No of Participants"
+                        required />
+                    <label for="nClass">No of Participants</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <textarea name="description"  class="form-control" id="nClass" required placeholder="Description"></textarea>
+                    <label for="nClass">Description</label>
+                </div>
+
+
+
+
+                <div class="col-12 text-center mt-3 mb-2">
+                    <button type="submit" class="btn btn-outline-primary">Add Levels</button>
+                </div>
+
+            </form>
+
+
+          </div>
+        </div> <!-- End row -->
+    </div> <!-- End container -->
+</section> <!-- End section -->
+
+
+{% endblock content %}
+
+
+{% block javascripts %}
+
+{% endblock javascripts %}
