@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from user.models import Event
 
 # Create your views here.
@@ -20,7 +20,7 @@ def event(request):
         events=Event.objects.create(name=name, description=description, participants=participants,created_by=request.user)
         events.save()
         
-        return render(request, 'organiser/event.html',)
+        return redirect('index')
     
     else:
         return render(request, 'organiser/event.html')
