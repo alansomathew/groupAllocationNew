@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block stylesheets %}
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="title text-center">
+                    <h2>Events</h2>
+                    <p> </p>
+                    <div class="border"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="event_id" value="{{ event_id }}">
+                    <!-- Loop through groups -->
+                    {% for group in groups %}
+                    <!-- Input field for each group ID -->
+                    <input type="hidden" name="group" value="{{ group.id }}">
+                    {% endfor %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                {% for group in groups %}
+                                <th>{{ group.name }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for from_group in groups %}
+                            <tr>
+                                <td>{{ from_group.name }}</td>
+                                {% for to_group in groups %}
+                                <td>
+                                    <input type="number" name="time_{{ from_group.id }}_{{ to_group.id }}">
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="col-12 text-center mt-3 mb-2">
+                        <input class="btn btn-outline-primary" type="submit" name="add_level" value="Next">
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+{% block javascripts %}
+{% endblock javascripts %}

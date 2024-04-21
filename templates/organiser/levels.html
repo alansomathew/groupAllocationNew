@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!--
+Start About Section
+==================================== -->
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6">
+                <!-- section title -->
+                <div class="title text-center">
+                    <h2>Events</h2>
+                    <p> </p>
+                    <div class="border"></div>
+                </div>
+                <!-- /section title -->
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <form method="post">
+                    {% csrf_token %}
+                    <!-- Dropdown for selecting number of groups -->
+                    <div class="form-floating mb-3">
+                        <select class="form-control" name="num_groups" id="num_groups" required>
+                            <option value="" selected disabled hidden>Select number of groups</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+    
+                            <!-- Add more options as needed -->
+                        </select>
+    
+                        <label for="num_groups">Select number of groups</label>
+                    </div>
+                    
+                    <!-- Input fields for entering capacity for each group -->
+                    <div id="capacity_fields"></div>
+
+                    <!-- Buttons to add level or finish -->
+                    <div class="col-12 text-center mt-3 mb-2">
+                        
+                   
+                    <input class="btn btn-outline-primary" type="submit" name="add_level" value="Add Level">
+                    <input class="btn btn-outline-success" type="submit" name="finish" value="Finish">
+                </div>
+                </form>
+
+
+            </div>
+        </div> <!-- End row -->
+    </div> <!-- End container -->
+</section> <!-- End section -->
+
+
+{% endblock content %}
+
+
+{% block javascripts %}
+<script>
+    // Function to dynamically create text boxes based on selected number of groups
+    function createTextBoxes() {
+        var numGroups = document.getElementById('num_groups').value;
+        var container = document.getElementById('capacity_fields');
+        container.innerHTML = ''; // Clear previous content
+        
+        // Create text boxes based on selected number of groups
+        for (var i = 0; i < numGroups; i++) {
+            var label = document.createElement('label');
+            label.innerHTML = 'Capacity for Group ' + (i+1) + ': ';
+            container.appendChild(label);
+
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'capacity_' + i;
+            input.required = true;
+            input.className="form-control"
+            container.appendChild(input);
+
+            container.appendChild(document.createElement('br'));
+        }
+    }
+
+    // Call the function when the dropdown value changes
+    document.getElementById('num_groups').addEventListener('change', createTextBoxes);
+
+    // Call the function initially to create text boxes based on default value
+    createTextBoxes();
+</script>
+
+{% endblock javascripts %}

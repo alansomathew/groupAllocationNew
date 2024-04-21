@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!--
+Start About Section
+==================================== -->
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6">
+                <!-- section title -->
+                <div class="title text-center">
+                    <h2>X value</h2>
+                    <p> </p>
+                    <div class="border"></div>
+                </div>
+                <!-- /section title -->
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <form action="" method="post">
+                    {% csrf_token %}
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="nClass" name="x_value" aria-label="Name" required />
+                        <label for="nClass">x Value</label>
+                    </div>
+
+
+
+
+
+                    <div class="col-12 text-center mt-3 mb-2">
+                        <button type="submit" class="btn btn-outline-primary">Next</button>
+                    </div>
+
+                </form>
+
+                <p class="text-warining text-center">
+                    Happiness matrix is created by dividing random integer ‘X’ with
+                    every element of time matrix except the diagonal. The diagonal
+                    should be given the value ‘X’. The value of x should be greater than the highest value in the time
+                    matrix
+
+
+                </p>
+
+
+            </div>
+        </div> <!-- End row -->
+    </div> <!-- End container -->
+</section> <!-- End section -->
+
+
+{% endblock content %}
+
+
+{% block javascripts %}
+
+{% endblock javascripts %}
