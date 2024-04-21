@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Event Details{% endblock title %}
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!--
+Start About Section
+==================================== -->
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="event-details-content">
+                    <h2 class="text-center">{{ event.name }}</h2>
+                    <span class="mx-5">Description :{{ event.description }}</span>
+                    <span class="mx-5">Participants: {{ event.participants }}</span>
+                    <span class="mx-5"> X Value: {{ event.x_value }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-12">
+
+                {% for level in levels %}
+                <h4>Level {{forloop.counter}}</h4>
+
+                <ul>
+                    {% for group in groups %}
+                    {% if group.level == level %}
+                    <li>{{ group.name }} - Capacity: {{ group.capacity }}</li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <h3>Time Matrix</h3>
+                <table>
+
+                    <tbody>
+                        {% for row in time_matrix %}
+                        <tr>
+                            <td></td>
+
+                            <td>{{ row.group_from.name }} to {{row.group_to.name}} :</td>
+
+                            <td>{{ row.travel_time }}</td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="col-lg-6">
+                <h3>Happiness Matrix</h3>
+
+
+                <!-- {{happiness_matrix}} -->
+
+
+
+                <table cellpadding="10">
+                    <tbody>
+
+                        {% for row in happiness_matrix %}
+                        <tr>
+                            {% for item in row %}
+                            <td class="text-center" >
+                                {{ item }}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</section> <!-- End section -->
+
+
+{% endblock content %}
+
+
+{% block javascripts %}
+
+{% endblock javascripts %}

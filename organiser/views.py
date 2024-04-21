@@ -116,3 +116,48 @@ def add_x_value(request, id):
         return redirect('index')
     else:
         return render(request, 'organiser/x_value.html')
+    
+def create_happiness_matrix(event_id):
+    event = Event.objects.get(id=event_id)
+    x_value = event.x_value
+    levels = Levels.objects.filter(event=event)
+    groups = Group.objects.filter(level__in=levels)
+
+    happiness_matrix = []
+
+    temp = [" "]
+    for i in range(1,len(groups)+1):
+        temp.append( "group "+i.__str__())
+    happiness_matrix.append(temp)
+
+    for i in range(len(groups)):
+        row = ["group "+(i+1).__str__()]
+        for j in range(len(groups)):
+            travel_time = TimeMatrix.objects.filter(group_from=groups[i], group_to=groups[j]).first().travel_time
+            if i == j:
+                row.append(x_value)
+            else:
+                if travel_time != 0:
+                    row.append(x_value / travel_time)
+                else:
+                    row.append(0)
+        happiness_matrix.append(row)
+
+    return happiness_matrix
+
+def display_event_details(request, event_id):
+    event = Event.objects.get(id=event_id)
+    levels = Levels.objects.filter(event=event)
+    groups = Group.objects.filter(level__in=levels)
+    time_matrix = TimeMatrix.objects.filter(group_from__level__event=event)
+    happiness_matrix = create_happiness_matrix(event_id)
+    # print(happiness_matrix)
+
+    context = {
+        'event': event,
+        'levels': levels,
+        'groups': groups,
+        'time_matrix': time_matrix,
+        'happiness_matrix': happiness_matrix
+    }
+    return render(request, 'organiser/event_details.html', context)
