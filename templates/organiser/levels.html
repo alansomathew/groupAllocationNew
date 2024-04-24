@@ -37,23 +37,23 @@ Start About Section
                             <option value="3">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
-    
+
                             <!-- Add more options as needed -->
                         </select>
-    
+
                         <label for="num_groups">Select number of groups</label>
                     </div>
-                    
+
                     <!-- Input fields for entering capacity for each group -->
                     <div id="capacity_fields"></div>
 
                     <!-- Buttons to add level or finish -->
                     <div class="col-12 text-center mt-3 mb-2">
-                        
-                   
-                    <input class="btn btn-outline-primary" type="submit" name="add_level" value="Add Level">
-                    <input class="btn btn-outline-success" type="submit" name="finish" value="Finish">
-                </div>
+
+
+                        <input class="btn btn-outline-primary" type="submit" name="add_level" value="Add Level">
+                        <input class="btn btn-outline-success" type="submit" name="finish" value="Finish">
+                    </div>
                 </form>
 
 
@@ -73,19 +73,32 @@ Start About Section
         var numGroups = document.getElementById('num_groups').value;
         var container = document.getElementById('capacity_fields');
         container.innerHTML = ''; // Clear previous content
-        
+
         // Create text boxes based on selected number of groups
         for (var i = 0; i < numGroups; i++) {
-            var label = document.createElement('label');
-            label.innerHTML = 'Capacity for Group ' + (i+1) + ': ';
-            container.appendChild(label);
+            var nameLabel = document.createElement('label');
+            nameLabel.innerHTML = 'Name for Group ' + (i + 1) + ': ';
+            container.appendChild(nameLabel);
 
-            var input = document.createElement('input');
-            input.type = 'text';
-            input.name = 'capacity_' + i;
-            input.required = true;
-            input.className="form-control"
-            container.appendChild(input);
+            var nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.name = 'group_name_' + i;
+            nameInput.required = true;
+            nameInput.className = "form-control";
+            container.appendChild(nameInput);
+
+            container.appendChild(document.createElement('br'));
+
+            var capacityLabel = document.createElement('label');
+            capacityLabel.innerHTML = 'Capacity for Group ' + (i + 1) + ': ';
+            container.appendChild(capacityLabel);
+
+            var capacityInput = document.createElement('input');
+            capacityInput.type = 'text';
+            capacityInput.name = 'capacity_' + i;
+            capacityInput.required = true;
+            capacityInput.className = "form-control";
+            container.appendChild(capacityInput);
 
             container.appendChild(document.createElement('br'));
         }

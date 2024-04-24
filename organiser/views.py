@@ -38,36 +38,25 @@ def add_level(request, id):
 
     if request.method == "POST":
         num_groups = int(request.POST.get('num_groups'))
-        capacities = [int(request.POST.get(
-            f'capacity_{i}')) for i in range(num_groups)]
+        group_names = [request.POST.get(f'group_name_{i}') for i in range(num_groups)]
+        capacities = [int(request.POST.get(f'capacity_{i}')) for i in range(num_groups)]
 
-        if 'add_level' in request.POST:
+        if 'add_level' in request.POST or 'finish' in request.POST:
             # Save level details to the database
             level = Levels.objects.create(
-                name=num_groups, event_id=event_id, created_by=request.user)
+                event_id=event_id, created_by=request.user)
 
-            # Create groups with default names like "Group 1", "Group 2", etc.
-            for i, capacity in enumerate(capacities):
-                group_name = f"Group {i+1}"
+            # Create groups with custom names and capacities
+            for name, capacity in zip(group_names, capacities):
                 Group.objects.create(
-                    level=level, name=group_name, capacity=capacity, created_by=request.user)
+                    level=level, name=name, capacity=capacity, created_by=request.user)
 
-            # Redirect to the same page with the event ID
-            return redirect('add_level', id=event_id)
-
-        elif 'finish' in request.POST:
-            # Save level details to the database
-            level = Levels.objects.create(
-                name=num_groups, event_id=event_id, created_by=request.user)
-
-            # Create groups with default names like "Group 1", "Group 2", etc.
-            for i, capacity in enumerate(capacities):
-                group_name = f"Group {i+1}"
-                Group.objects.create(
-                    level=level, name=group_name, capacity=capacity, created_by=request.user)
-
-            # Redirect to a different page or render a different template
-            return redirect('add_time_matrix', id=event_id)
+            if 'add_level' in request.POST:
+                # Redirect to the same page with the event ID
+                return redirect('add_level', id=event_id)
+            elif 'finish' in request.POST:
+                # Redirect to a different page or render a different template
+                return redirect('add_time_matrix', id=event_id)
 
     else:
         return render(request, 'organiser/levels.html')
