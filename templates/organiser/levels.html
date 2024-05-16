@@ -130,31 +130,31 @@ function createGroupInputs(levelIndex) {
 
     for (var i = 0; i < numGroups; i++) {
         var groupContainer = document.createElement('div');
-        groupContainer.className = 'group-container';
+        groupContainer.className = 'group-container d-flex p-4 gap';
         groupContainer.id = 'group_' + levelIndex + '_' + i;
 
         var nameLabel = document.createElement('label');
-        nameLabel.innerHTML = 'Name for Group ' + (i + 1) + ': ';
+        nameLabel.innerHTML = 'Group_Name_' + (i + 1) ;
         groupContainer.appendChild(nameLabel);
 
         var nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.name = 'group_name_' + levelIndex + '_' + i;
         nameInput.required = true;
-        nameInput.className = 'form-control';
+        nameInput.className = 'form-control ml-3 mr-2';
         groupContainer.appendChild(nameInput);
 
         groupContainer.appendChild(document.createElement('br'));
 
         var capacityLabel = document.createElement('label');
-        capacityLabel.innerHTML = 'Capacity for Group ' + (i + 1) + ': ';
+        capacityLabel.innerHTML = 'Group_Capacity_' + (i + 1) ;
         groupContainer.appendChild(capacityLabel);
 
         var capacityInput = document.createElement('input');
         capacityInput.type = 'text';
         capacityInput.name = 'capacity_' + levelIndex + '_' + i;
         capacityInput.required = true;
-        capacityInput.className = 'form-control';
+        capacityInput.className = 'form-control ml-3  mr-2';
         groupContainer.appendChild(capacityInput);
 
         groupContainer.appendChild(document.createElement('br'));
