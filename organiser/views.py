@@ -32,34 +32,38 @@ def event(request):
     else:
         return render(request, 'organiser/event.html')
 
+
 @login_required
 def add_level(request, id):
     event_id = id  # Assuming 'id' is the event ID passed from the URL
 
     if request.method == "POST":
-        num_groups = int(request.POST.get('num_groups'))
-        group_names = [request.POST.get(f'group_name_{i}') for i in range(num_groups)]
-        capacities = [int(request.POST.get(f'capacity_{i}')) for i in range(num_groups)]
+        num_levels = int(request.POST.get('num_levels'))
 
         if 'add_level' in request.POST or 'finish' in request.POST:
-            # Save level details to the database
-            level = Levels.objects.create(
-                event_id=event_id, created_by=request.user)
+            # Iterate through each level
+            for level_index in range(num_levels):
+                # Create level
+                level = Levels.objects.create(event_id=event_id, created_by=request.user)
 
-            # Create groups with custom names and capacities
-            for name, capacity in zip(group_names, capacities):
-                Group.objects.create(
-                    level=level, name=name, capacity=capacity, created_by=request.user)
+                # Get number of groups for this level
+                num_groups = int(request.POST.get(f'num_groups_{level_index}'))
+                
+                # Create groups for this level
+                for group_index in range(num_groups):
+                    group_name = request.POST.get(f'group_name_{level_index}_{group_index}')
+                    capacity = int(request.POST.get(f'capacity_{level_index}_{group_index}'))
+                    Group.objects.create(level=level, name=group_name, capacity=capacity, created_by=request.user)
 
-            if 'add_level' in request.POST:
-                # Redirect to the same page with the event ID
-                return redirect('add_level', id=event_id)
-            elif 'finish' in request.POST:
+            # if 'add_level' in request.POST:
+            #     # Redirect to the same page with the event ID
+            #     return redirect('add_level', id=event_id)
+            # elif 'finish' in request.POST:
                 # Redirect to a different page or render a different template
-                return redirect('add_time_matrix', id=event_id)
+            return redirect('add_time_matrix', id=event_id)
 
     else:
-        return render(request, 'organiser/levels.html')
+        return render(request, 'organiser/levels.html', {'event_id': event_id})
 
 @login_required
 def add_time_matrix(request, id):

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock title %}
 {% block stylesheets %}
-
+<!-- Add any necessary CSS styles here -->
 {% endblock stylesheets %}
 
 {% block content %}
@@ -12,7 +12,6 @@ Start About Section
 <section class="service-2 section">
     <div class="container">
         <div class="row justify-content-center">
-
             <div class="col-lg-6">
                 <!-- section title -->
                 <div class="title text-center">
@@ -24,91 +23,148 @@ Start About Section
             </div>
         </div>
         <div class="row">
-
             <div class="col-md-12">
                 <form method="post">
                     {% csrf_token %}
-                    <!-- Dropdown for selecting number of groups -->
+                    <!-- Dropdown for selecting number of levels -->
                     <div class="form-floating mb-3">
-                        <select class="form-control" name="num_groups" id="num_groups" required>
-                            <option value="" selected disabled hidden>Select number of groups</option>
+                        <select class="form-control" name="num_levels" id="num_levels" required>
+                            <option value="" selected disabled hidden>Select number of levels</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
-
-                            <!-- Add more options as needed -->
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
                         </select>
-
-                        <label for="num_groups">Select number of groups</label>
+                        <label for="num_levels">Select number of levels</label>
                     </div>
 
-                    <!-- Input fields for entering capacity for each group -->
-                    <div id="capacity_fields"></div>
+                    <!-- Container for levels -->
+                    <div id="levels_container"></div>
 
                     <!-- Buttons to add level or finish -->
                     <div class="col-12 text-center mt-3 mb-2">
-
-
-                        <input class="btn btn-outline-primary" type="submit" name="add_level" value="Add Level">
+                        <input class="btn btn-outline-primary" type="button" name="add_level" id="add_level" onclick="createLevels(1)" value="Add Level">
                         <input class="btn btn-outline-success" type="submit" name="finish" value="Finish">
                     </div>
                 </form>
-
-
             </div>
         </div> <!-- End row -->
     </div> <!-- End container -->
 </section> <!-- End section -->
 
-
 {% endblock content %}
-
 
 {% block javascripts %}
 <script>
-    // Function to dynamically create text boxes based on selected number of groups
-    function createTextBoxes() {
-        var numGroups = document.getElementById('num_groups').value;
-        var container = document.getElementById('capacity_fields');
-        container.innerHTML = ''; // Clear previous content
-
-        // Create text boxes based on selected number of groups
-        for (var i = 0; i < numGroups; i++) {
-            var nameLabel = document.createElement('label');
-            nameLabel.innerHTML = 'Name for Group ' + (i + 1) + ': ';
-            container.appendChild(nameLabel);
-
-            var nameInput = document.createElement('input');
-            nameInput.type = 'text';
-            nameInput.name = 'group_name_' + i;
-            nameInput.required = true;
-            nameInput.className = "form-control";
-            container.appendChild(nameInput);
-
-            container.appendChild(document.createElement('br'));
-
-            var capacityLabel = document.createElement('label');
-            capacityLabel.innerHTML = 'Capacity for Group ' + (i + 1) + ': ';
-            container.appendChild(capacityLabel);
-
-            var capacityInput = document.createElement('input');
-            capacityInput.type = 'text';
-            capacityInput.name = 'capacity_' + i;
-            capacityInput.required = true;
-            capacityInput.className = "form-control";
-            container.appendChild(capacityInput);
-
-            container.appendChild(document.createElement('br'));
-        }
+   function createLevels(V) {
+    var numLevels = parseInt(document.getElementById('num_levels').value) + parseInt(V);
+    if(numLevels <= 10){
+        document.getElementById('num_levels').value = numLevels
     }
+   if(numLevels==10){
 
-    // Call the function when the dropdown value changes
-    document.getElementById('num_groups').addEventListener('change', createTextBoxes);
+       document.getElementById('add_level').style.display = 'none';
+   }
 
-    // Call the function initially to create text boxes based on default value
-    createTextBoxes();
+    
+    var container = document.getElementById('levels_container');
+    container.innerHTML = ''; // Clear previous content
+
+    for (var i = 0; i < numLevels; i++) {
+        var levelContainer = document.createElement('div');
+        levelContainer.className = 'level-container';
+        levelContainer.id = 'level_' + i;
+
+        var levelTitle = document.createElement('h3');
+        levelTitle.innerHTML = 'Level ' + (i + 1);
+        levelContainer.appendChild(levelTitle);
+
+        var levelSelectLabel = document.createElement('label');
+        levelSelectLabel.innerHTML = 'Number of Groups for Level ' + (i + 1) + ': ';
+        levelContainer.appendChild(levelSelectLabel);
+
+        var levelSelect = document.createElement('select');
+        levelSelect.className = 'form-control';
+        levelSelect.name = 'num_groups_' + i;
+        levelSelect.id = 'num_groups_' + i;
+        levelSelect.required = true;
+
+        var placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.innerHTML = 'Select number of groups';
+        placeholderOption.selected = true;
+        placeholderOption.disabled = true;
+        levelSelect.appendChild(placeholderOption);
+
+        for (var j = 1; j <= 5; j++) {
+            var option = document.createElement('option');
+            option.value = j;
+            option.innerHTML = j;
+            levelSelect.appendChild(option);
+        }
+        levelContainer.appendChild(levelSelect);
+
+        var groupsContainer = document.createElement('div');
+        groupsContainer.className = 'groups-container';
+        groupsContainer.id = 'groups_container_' + i;
+        levelContainer.appendChild(groupsContainer);
+
+        container.appendChild(levelContainer);
+
+        levelSelect.addEventListener('change', function() {
+            createGroupInputs(this.id.split('_')[2]);
+        });
+    }
+}
+
+function createGroupInputs(levelIndex) {
+    var numGroups = document.getElementById('num_groups_' + levelIndex).value;
+    var container = document.getElementById('groups_container_' + levelIndex);
+    container.innerHTML = ''; // Clear previous content
+
+    for (var i = 0; i < numGroups; i++) {
+        var groupContainer = document.createElement('div');
+        groupContainer.className = 'group-container';
+        groupContainer.id = 'group_' + levelIndex + '_' + i;
+
+        var nameLabel = document.createElement('label');
+        nameLabel.innerHTML = 'Name for Group ' + (i + 1) + ': ';
+        groupContainer.appendChild(nameLabel);
+
+        var nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.name = 'group_name_' + levelIndex + '_' + i;
+        nameInput.required = true;
+        nameInput.className = 'form-control';
+        groupContainer.appendChild(nameInput);
+
+        groupContainer.appendChild(document.createElement('br'));
+
+        var capacityLabel = document.createElement('label');
+        capacityLabel.innerHTML = 'Capacity for Group ' + (i + 1) + ': ';
+        groupContainer.appendChild(capacityLabel);
+
+        var capacityInput = document.createElement('input');
+        capacityInput.type = 'text';
+        capacityInput.name = 'capacity_' + levelIndex + '_' + i;
+        capacityInput.required = true;
+        capacityInput.className = 'form-control';
+        groupContainer.appendChild(capacityInput);
+
+        groupContainer.appendChild(document.createElement('br'));
+
+        container.appendChild(groupContainer);
+    }
+}
+
+
+
+    document.getElementById('num_levels').addEventListener('change',() => createLevels(0));
 </script>
-
 {% endblock javascripts %}
