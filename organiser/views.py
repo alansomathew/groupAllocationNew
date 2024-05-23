@@ -38,32 +38,49 @@ def add_level(request, id):
     event_id = id  # Assuming 'id' is the event ID passed from the URL
 
     if request.method == "POST":
-        num_levels = int(request.POST.get('num_levels'))
+        # Check if the 'finish' button was pressed
+        if 'finish' in request.POST:
+            level_counter = 1   
 
-        if 'add_level' in request.POST or 'finish' in request.POST:
-            # Iterate through each level
-            for level_index in range(num_levels):
+
+            while True:
+                level_key = f'Level_{level_counter}'
+
+                print(request.POST)
+                print(level_key)
+                if level_key not in request.POST:
+                    break
+
                 # Create level
                 level = Levels.objects.create(event_id=event_id, created_by=request.user)
 
-                # Get number of groups for this level
-                num_groups = int(request.POST.get(f'num_groups_{level_index}'))
-                
-                # Create groups for this level
-                for group_index in range(num_groups):
-                    group_name = request.POST.get(f'group_name_{level_index}_{group_index}')
-                    capacity = int(request.POST.get(f'capacity_{level_index}_{group_index}'))
+                group_counter = 1
+                while True:
+                    group_name_key = f'group_name_{level_counter}_{group_counter}'
+                    capacity_key = f'capacity_{level_counter}_{group_counter}'
+                    print(group_name_key)
+                    print(capacity_key)
+
+                    if group_name_key not in request.POST or capacity_key not in request.POST:
+                        break
+
+                    # Get group name and capacity
+                    group_name = request.POST.get(group_name_key)
+                    capacity = int(request.POST.get(capacity_key))
+
+                    # Create group
                     Group.objects.create(level=level, name=group_name, capacity=capacity, created_by=request.user)
 
-            # if 'add_level' in request.POST:
-            #     # Redirect to the same page with the event ID
-            #     return redirect('add_level', id=event_id)
-            # elif 'finish' in request.POST:
-                # Redirect to a different page or render a different template
+                    group_counter += 1
+                
+                level_counter += 1
+
+            # Redirect to the next step
             return redirect('add_time_matrix', id=event_id)
 
-    else:
-        return render(request, 'organiser/levels.html', {'event_id': event_id})
+    # For GET requests, render the levels page
+    return render(request, 'organiser/levels.html', {'event_id': event_id})
+
 
 @login_required
 def add_time_matrix(request, id):

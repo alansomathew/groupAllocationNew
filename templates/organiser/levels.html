@@ -1,170 +1,313 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock title %}
 {% block stylesheets %}
-<!-- Add any necessary CSS styles here -->
+<style>
+  .draggable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  cursor: grab;
+  background-color: #f0f0f0;
+  height: 300px;
+  width: 100%;
+  
+  font-size: 24px;
+  text-align: center;
+  line-height: 80px;
+}
+
+.sortable-container {
+  min-height: 450px;
+  border: 2px dashed #ccc;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #fafafa;
+  font-size: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sortable-container::after {
+  content: "Drop here to create a new level";
+  color: #aaa;
+  padding: 20px;
+
+}
+
+
+.sortable-container-group{
+  min-height: 200px;
+  border: 2px dashed #ccc;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #fafafa;
+  font-size: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sortable-container-group::after {
+  content: "Drop here to create a new Group";
+  color: #aaa;
+  padding: 10px;
+}
+
+
+.level-container,
+.group-container {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.level-container {
+  background-color: #e9f7ef;
+}
+
+.group-container {
+  background-color: #fef9e7;
+}
+
+.level-container h3,
+.group-container label {
+  margin: 0;
+  padding: 5px 0;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  color: #e74c3c;
+  font-size: 20px;
+}
+.mainInnerContainer {
+    width: 750px;
+    overflow-y: scroll;
+    height: 500px;
+    scrollbar-width: none; /* Hide default scrollbar in Firefox */
+    -ms-overflow-style: none; /* Hide default scrollbar in IE/Edge */
+}
+
+.mainInnerContainer::-webkit-scrollbar {
+    display: none; /* Hide default scrollbar in WebKit browsers */
+}
+
+
+</style>
 {% endblock stylesheets %}
 
 {% block content %}
-
-<!--
-Start About Section
-==================================== -->
 <section class="service-2 section">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <!-- section title -->
-                <div class="title text-center">
-                    <h2>Events</h2>
-                    <p> </p>
-                    <div class="border"></div>
-                </div>
-                <!-- /section title -->
+    <form method="post">
+        {% csrf_token %}
+  <div class="container">
+    <div class="row justify-content-center">
+        <div class=" text-center">
+          <h2>Events</h2>
+         
+          <div class="border"></div>
+          </div>
+    </div>
+   
+    <div class="row justify-content-center">
+      <div class="col-md-2 text-center d-flex align-items-center">
+        <div class="draggable" id="draggable_level" draggable="true">Level</div>
+      </div>
+      <div class="mainInnerContainer" id="mainInnerContainer">
+
+          <div class="col-md-12">
+              <div id="levels_container" class="sortable-container" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <form method="post">
-                    {% csrf_token %}
-                    <!-- Dropdown for selecting number of levels -->
-                    <div class="form-floating mb-3">
-                        <select class="form-control" name="num_levels" id="num_levels" required>
-                            <option value="" selected disabled hidden>Select number of levels</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
-                        <label for="num_levels">Select number of levels</label>
-                    </div>
+      <div class="col-md-2 text-center d-flex align-items-center">
+        <div class="draggable" id="draggable_group" draggable="true">Group</div>
+      </div>
+    </div>
+    <div class="col-12 text-center mt-3 mb-2">
+      <input class="btn btn-outline-success" type="submit" name="finish" value="Finish">
+    </div>
+  </div>
+</form>
 
-                    <!-- Container for levels -->
-                    <div id="levels_container"></div>
-
-                    <!-- Buttons to add level or finish -->
-                    <div class="col-12 text-center mt-3 mb-2">
-                        <input class="btn btn-outline-primary" type="button" name="add_level" id="add_level" onclick="createLevels(1)" value="Add Level">
-                        <input class="btn btn-outline-success" type="submit" name="finish" value="Finish">
-                    </div>
-                </form>
-            </div>
-        </div> <!-- End row -->
-    </div> <!-- End container -->
-</section> <!-- End section -->
-
+</section>
 {% endblock content %}
 
 {% block javascripts %}
 <script>
-   function createLevels(V) {
-    var numLevels = parseInt(document.getElementById('num_levels').value) + parseInt(V);
-    if(numLevels <= 10){
-        document.getElementById('num_levels').value = numLevels
-    }
-   if(numLevels==10){
+ document.addEventListener('DOMContentLoaded', function() {
+    var levelCounter = 0;
+    var groupCounter = 0;
 
-       document.getElementById('add_level').style.display = 'none';
-   }
+    document.getElementById('draggable_level').addEventListener('dragstart', function(event) {
+        event.dataTransfer.setData('type', 'level');
+    });
 
-    
-    var container = document.getElementById('levels_container');
-    container.innerHTML = ''; // Clear previous content
+    document.getElementById('draggable_group').addEventListener('dragstart', function(event) {
+        event.dataTransfer.setData('type', 'group');
+    });
 
-    for (var i = 0; i < numLevels; i++) {
+    window.allowDrop = function(event) {
+        event.preventDefault();
+    };
+
+    window.drop = function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        var data = event.dataTransfer.getData('type');
+        if (data === 'level') {
+            addLevel(event.target);
+        } else if (data === 'group') {
+            var targetLevel = event.target.closest('.level-container');
+            if (targetLevel) {
+                addGroup(targetLevel.querySelector('.groups-container'));
+            }
+        }
+        updateNumbers();
+    };
+
+    function addLevel(target) {
+        if (!target.classList.contains('sortable-container')) return;
+
+        levelCounter++;
         var levelContainer = document.createElement('div');
         levelContainer.className = 'level-container';
-        levelContainer.id = 'level_' + i;
+        levelContainer.id = 'level_' + levelCounter;
+        levelContainer.name = 'level_' + levelCounter;
+        levelContainer.draggable = true;
+        levelContainer.ondragstart = function(event) {
+            event.dataTransfer.setData('type', 'level');
+        };
+        levelContainer.ondrop = drop;
+        levelContainer.ondragover = allowDrop;
 
         var levelTitle = document.createElement('h3');
-        levelTitle.innerHTML = 'Level ' + (i + 1);
+        levelTitle.innerHTML = 'Level ' + levelCounter;
         levelContainer.appendChild(levelTitle);
 
-        var levelSelectLabel = document.createElement('label');
-        levelSelectLabel.innerHTML = 'Number of Groups for Level ' + (i + 1) + ': ';
-        levelContainer.appendChild(levelSelectLabel);
+        var levelHiddenInput = document.createElement('input');
+        levelHiddenInput.type = 'hidden';
+        levelHiddenInput.name = 'Level_' + levelCounter;
+        levelHiddenInput.required = true;
+        levelHiddenInput.value = levelCounter;
+        levelContainer.appendChild(levelHiddenInput);
 
-        var levelSelect = document.createElement('select');
-        levelSelect.className = 'form-control';
-        levelSelect.name = 'num_groups_' + i;
-        levelSelect.id = 'num_groups_' + i;
-        levelSelect.required = true;
-
-        var placeholderOption = document.createElement('option');
-        placeholderOption.value = '';
-        placeholderOption.innerHTML = 'Select number of groups';
-        placeholderOption.selected = true;
-        placeholderOption.disabled = true;
-        levelSelect.appendChild(placeholderOption);
-
-        for (var j = 1; j <= 5; j++) {
-            var option = document.createElement('option');
-            option.value = j;
-            option.innerHTML = j;
-            levelSelect.appendChild(option);
-        }
-        levelContainer.appendChild(levelSelect);
+        var removeBtn = document.createElement('span');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = '✖';
+        removeBtn.onclick = function() {
+            levelContainer.remove();
+            updateNumbers();
+        };
+        levelContainer.appendChild(removeBtn);
 
         var groupsContainer = document.createElement('div');
-        groupsContainer.className = 'groups-container';
-        groupsContainer.id = 'groups_container_' + i;
+        groupsContainer.className = 'groups-container sortable-container-group';
+        groupsContainer.id = 'groups_container_' + levelCounter;
+        groupsContainer.ondrop = drop;
+        groupsContainer.ondragover = allowDrop;
         levelContainer.appendChild(groupsContainer);
 
-        container.appendChild(levelContainer);
+        target.appendChild(levelContainer);
+        scrollToBottom(document.querySelector('.mainInnerContainer'));
 
-        levelSelect.addEventListener('change', function() {
-            createGroupInputs(this.id.split('_')[2]);
-        });
     }
-}
 
-function createGroupInputs(levelIndex) {
-    var numGroups = document.getElementById('num_groups_' + levelIndex).value;
-    var container = document.getElementById('groups_container_' + levelIndex);
-    container.innerHTML = ''; // Clear previous content
+    function addGroup(target) {
+        console.log(levelCounter);
+        if (!target.classList.contains('groups-container')) return;
 
-    for (var i = 0; i < numGroups; i++) {
+        groupCounter++;
         var groupContainer = document.createElement('div');
-        groupContainer.className = 'group-container d-flex p-4 gap';
-        groupContainer.id = 'group_' + levelIndex + '_' + i;
+        groupContainer.className = 'group-container';
+        groupContainer.id = 'group_' + groupCounter;
+        groupContainer.draggable = true;
+        groupContainer.ondragstart = function(event) {
+            event.dataTransfer.setData('type', 'group');
+        };
 
-        var nameLabel = document.createElement('label');
-        nameLabel.innerHTML = 'Group_Name_' + (i + 1) ;
-        groupContainer.appendChild(nameLabel);
+        var groupName = document.createElement('label');
+        groupName.innerHTML = 'Group Name ' + groupCounter;
+        groupContainer.appendChild(groupName);
 
         var nameInput = document.createElement('input');
         nameInput.type = 'text';
-        nameInput.name = 'group_name_' + levelIndex + '_' + i;
+        nameInput.name = 'group_name_' + levelCounter +"_"+ groupCounter;
         nameInput.required = true;
         nameInput.className = 'form-control ml-3 mr-2';
         groupContainer.appendChild(nameInput);
 
-        groupContainer.appendChild(document.createElement('br'));
-
-        var capacityLabel = document.createElement('label');
-        capacityLabel.innerHTML = 'Group_Capacity_' + (i + 1) ;
-        groupContainer.appendChild(capacityLabel);
+        var groupCapacity = document.createElement('label');
+        groupCapacity.innerHTML = 'Group Capacity ' + groupCounter;
+        groupContainer.appendChild(groupCapacity);
 
         var capacityInput = document.createElement('input');
         capacityInput.type = 'text';
-        capacityInput.name = 'capacity_' + levelIndex + '_' + i;
+        capacityInput.name = 'capacity_' + levelCounter +"_"+ groupCounter;
         capacityInput.required = true;
-        capacityInput.className = 'form-control ml-3  mr-2';
+        capacityInput.className = 'form-control ml-3 mr-2';
         groupContainer.appendChild(capacityInput);
 
-        groupContainer.appendChild(document.createElement('br'));
+        var removeBtn = document.createElement('span');
+        removeBtn.className = 'remove-btn';
+        removeBtn.innerHTML = '✖';
+        removeBtn.onclick = function() {
+            groupContainer.remove();
+            updateNumbers();
+        };
+        groupContainer.appendChild(removeBtn);
 
-        container.appendChild(groupContainer);
+        target.appendChild(groupContainer);
+
+        scrollToBottom(document.querySelector('.group_' + groupCounter));
+
+
     }
+
+    function updateNumbers() {
+        var levels = document.getElementById('levels_container').children;
+        levelCounter = 0;
+        groupCounter = 0;
+        for (var i = 0; i < levels.length; i++) {
+            levelCounter++;
+            levels[i].id = 'level_' + (i + 1);
+            levels[i].querySelector('h3').innerHTML = 'Level ' + (i + 1);
+            levels[i].querySelector('input[type="hidden"]').name = 'Level_' + (i + 1);
+
+            var groups = levels[i].querySelector('.groups-container').children;
+            for (var j = 0; j < groups.length; j++) {
+                groupCounter++;
+                groups[j].id = 'group_' + (i + 1) + '_' + (j + 1);
+                var labels = groups[j].querySelectorAll('label');
+                labels[0].innerHTML = 'Group Name ' + (j + 1);
+                labels[1].innerHTML = 'Group Capacity ' + (j + 1);
+                groups[j].querySelector('input[name^="group_name"]').name = 'group_name_' + (i + 1) + '_' + (j + 1);
+                groups[j].querySelector('input[name^="capacity"]').name = 'capacity_' + (i + 1) + '_' + (j + 1);
+            }
+        }
+    }    
+
+   
+
+function scrollToBottom(container) {
+    container.scrollTop = container.scrollHeight;
 }
 
+});
 
 
-    document.getElementById('num_levels').addEventListener('change',() => createLevels(0));
+
 </script>
 {% endblock javascripts %}
