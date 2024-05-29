@@ -20,7 +20,7 @@
 }
 
 .sortable-container {
-  min-height: 450px;
+  min-height: 430px;
   border: 2px dashed #ccc;
   margin-top: 20px;
   padding: 10px;
@@ -48,9 +48,10 @@
   background-color: #fafafa;
   font-size: 24px;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  gap:10px
 }
 
 .sortable-container-group::after {
@@ -76,6 +77,7 @@
 
 .group-container {
   background-color: #fef9e7;
+  width: 250px;
 }
 
 .level-container h3,
@@ -93,7 +95,7 @@
   font-size: 20px;
 }
 .mainInnerContainer {
-    width: 750px;
+    width: 100%;
     overflow-y: scroll;
     height: 500px;
     scrollbar-width: none; /* Hide default scrollbar in Firefox */
@@ -112,7 +114,7 @@
 <section class="service-2 section">
     <form method="post">
         {% csrf_token %}
-  <div class="container-fluid">
+  <div class="container-fluid w-100">
     <div class="row justify-content-center">
         <div class=" text-center">
           <h2>Events</h2>
@@ -121,7 +123,7 @@
           </div>
     </div>
    
-    <div class="row justify-content-center">
+    <div class="d-flex  justify-content-between ">
       <div class="col-md-2 text-center d-flex align-items-center">
         <div class="draggable" id="draggable_level" draggable="true">Level</div>
       </div>
@@ -136,7 +138,7 @@
       </div>
     </div>
     <div class="col-12 text-center mt-3 mb-2">
-      <input class="btn btn-outline-success" type="submit" name="finish" value="Finish">
+      <input class="btn btn-outline-success" type="submit" name="finish" value="Next">
     </div>
   </div>
 </form>
@@ -234,7 +236,7 @@
         nameInput.type = 'text';
         nameInput.name = 'group_name_' + target.id.split('_')[2] + '_' + groupCounter;
         nameInput.required = true;
-        nameInput.className = 'form-control ml-3 mr-2';
+        nameInput.className = 'form-control ';
         groupContainer.appendChild(nameInput);
 
         var groupCapacity = document.createElement('label');
@@ -245,7 +247,7 @@
         capacityInput.type = 'number';  // Changed to 'number' for better validation
         capacityInput.name = 'capacity_' + target.id.split('_')[2] + '_' + groupCounter;
         capacityInput.required = true;
-        capacityInput.className = 'form-control ml-3 mr-2';
+        capacityInput.className = 'form-control ';
         groupContainer.appendChild(capacityInput);
 
         var removeBtn = document.createElement('span');
