@@ -112,7 +112,7 @@
 <section class="service-2 section">
     <form method="post">
         {% csrf_token %}
-  <div class="container">
+  <div class="container-fluid">
     <div class="row justify-content-center">
         <div class=" text-center">
           <h2>Events</h2>
@@ -182,16 +182,10 @@
         if (!target.classList.contains('sortable-container')) return;
 
         levelCounter++;
+
         var levelContainer = document.createElement('div');
         levelContainer.className = 'level-container';
         levelContainer.id = 'level_' + levelCounter;
-        levelContainer.name = 'level_' + levelCounter;
-        levelContainer.draggable = true;
-        levelContainer.ondragstart = function(event) {
-            event.dataTransfer.setData('type', 'level');
-        };
-        levelContainer.ondrop = drop;
-        levelContainer.ondragover = allowDrop;
 
         var levelTitle = document.createElement('h3');
         levelTitle.innerHTML = 'Level ' + levelCounter;
@@ -200,7 +194,6 @@
         var levelHiddenInput = document.createElement('input');
         levelHiddenInput.type = 'hidden';
         levelHiddenInput.name = 'Level_' + levelCounter;
-        levelHiddenInput.required = true;
         levelHiddenInput.value = levelCounter;
         levelContainer.appendChild(levelHiddenInput);
 
@@ -222,21 +215,16 @@
 
         target.appendChild(levelContainer);
         scrollToBottom(document.querySelector('.mainInnerContainer'));
-
     }
 
     function addGroup(target) {
-        console.log(levelCounter);
         if (!target.classList.contains('groups-container')) return;
 
         groupCounter++;
+
         var groupContainer = document.createElement('div');
         groupContainer.className = 'group-container';
         groupContainer.id = 'group_' + groupCounter;
-        groupContainer.draggable = true;
-        groupContainer.ondragstart = function(event) {
-            event.dataTransfer.setData('type', 'group');
-        };
 
         var groupName = document.createElement('label');
         groupName.innerHTML = 'Group Name ' + groupCounter;
@@ -244,7 +232,7 @@
 
         var nameInput = document.createElement('input');
         nameInput.type = 'text';
-        nameInput.name = 'group_name_' + levelCounter +"_"+ groupCounter;
+        nameInput.name = 'group_name_' + target.id.split('_')[2] + '_' + groupCounter;
         nameInput.required = true;
         nameInput.className = 'form-control ml-3 mr-2';
         groupContainer.appendChild(nameInput);
@@ -254,8 +242,8 @@
         groupContainer.appendChild(groupCapacity);
 
         var capacityInput = document.createElement('input');
-        capacityInput.type = 'text';
-        capacityInput.name = 'capacity_' + levelCounter +"_"+ groupCounter;
+        capacityInput.type = 'number';  // Changed to 'number' for better validation
+        capacityInput.name = 'capacity_' + target.id.split('_')[2] + '_' + groupCounter;
         capacityInput.required = true;
         capacityInput.className = 'form-control ml-3 mr-2';
         groupContainer.appendChild(capacityInput);
@@ -270,10 +258,7 @@
         groupContainer.appendChild(removeBtn);
 
         target.appendChild(groupContainer);
-
-        scrollToBottom(document.querySelector('.group_' + groupCounter));
-
-
+        scrollToBottom(document.querySelector('.mainInnerContainer'));
     }
 
     function updateNumbers() {
@@ -297,14 +282,11 @@
                 groups[j].querySelector('input[name^="capacity"]').name = 'capacity_' + (i + 1) + '_' + (j + 1);
             }
         }
-    }    
+    }
 
-   
-
-function scrollToBottom(container) {
-    container.scrollTop = container.scrollHeight;
-}
-
+    function scrollToBottom(container) {
+        container.scrollTop = container.scrollHeight;
+    }
 });
 
 

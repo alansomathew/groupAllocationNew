@@ -40,14 +40,11 @@ def add_level(request, id):
     if request.method == "POST":
         # Check if the 'finish' button was pressed
         if 'finish' in request.POST:
-            level_counter = 1   
-
+            level_counter = 1
 
             while True:
                 level_key = f'Level_{level_counter}'
 
-                print(request.POST)
-                print(level_key)
                 if level_key not in request.POST:
                     break
 
@@ -58,8 +55,6 @@ def add_level(request, id):
                 while True:
                     group_name_key = f'group_name_{level_counter}_{group_counter}'
                     capacity_key = f'capacity_{level_counter}_{group_counter}'
-                    print(group_name_key)
-                    print(capacity_key)
 
                     if group_name_key not in request.POST or capacity_key not in request.POST:
                         break
@@ -72,7 +67,7 @@ def add_level(request, id):
                     Group.objects.create(level=level, name=group_name, capacity=capacity, created_by=request.user)
 
                     group_counter += 1
-                
+
                 level_counter += 1
 
             # Redirect to the next step
@@ -80,7 +75,6 @@ def add_level(request, id):
 
     # For GET requests, render the levels page
     return render(request, 'organiser/levels.html', {'event_id': event_id})
-
 
 @login_required
 def add_time_matrix(request, id):
