@@ -17,6 +17,7 @@ def event(request):
         name = request.POST.get('fn')
         description = request.POST.get('description')
         participants = request.POST.get('ln')
+        code=request.POST.get('code')
 
         # Do some validation on the data received
         # ...
@@ -24,7 +25,7 @@ def event(request):
         # Save to database or whatever you want to do with the data
         # ...
         events = Event.objects.create(
-            name=name, description=description, participants=participants, created_by=request.user)
+            name=name, description=description, participants=participants,code=code, created_by=request.user)
         events.save()
 
         return redirect('add_level', id=events.id)

@@ -6,9 +6,11 @@ from django.contrib.auth.models import User
 class Event(models.Model):
     name=models.CharField(max_length=50)
     description=models.TextField()
+    code=models.TextField()
     participants=models.IntegerField()
     x_value=models.IntegerField(null=True)
     is_active = models.BooleanField(default=True)
+    is_private = models.BooleanField(default=False)
     created_by=models.ForeignKey(User,on_delete=models.CASCADE)
     created_on=models.DateTimeField(auto_now_add=True)
 
