@@ -72,7 +72,7 @@ Start About Section
                         {% for row in happiness_matrix %}
                         <tr>
                             {% for item in row %}
-                            <td class="text-center" >
+                            <td class="text-center">
                                 {{ item }}
                             </td>
                             {% endfor %}
@@ -82,6 +82,15 @@ Start About Section
                 </table>
             </div>
         </div>
+
+        {% if event.is_active %}
+
+        <a href="{% url 'start_event' event.id %}">Stop</a>
+        {% else %}
+        <a href="{% url 'stop_event' event.id %}">Start</a>
+
+        {% endif %}
+
 
     </div>
 </section> <!-- End section -->

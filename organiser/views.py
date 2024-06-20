@@ -166,3 +166,19 @@ def display_event_details(request, event_id):
         'happiness_matrix': happiness_matrix
     }
     return render(request, 'organiser/event_details.html', context)
+
+
+# start event and stop event
+def start_event(request, event_id):
+    event = Event.objects.get(id=event_id)
+    event.is_active = True
+    event.save()
+    messages.success(request, 'Event started successfully.')
+    return redirect('event_details', event_id=event_id)
+
+def stop_event(request, event_id):
+    event = Event.objects.get(id=event_id)
+    event.is_active = False
+    event.save()
+    messages.success(request, 'Event stopped successfully.')
+    return redirect('event_details', event_id=event_id)

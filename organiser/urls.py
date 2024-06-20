@@ -10,5 +10,8 @@ urlpatterns = [
     path('time/matrix/<str:id>/',views.add_time_matrix,name='add_time_matrix'),
     path('add/x/value/<str:id>/',views.add_x_value,name='add_x_value'),
     path('display/event/details/<str:event_id>/',views.display_event_details,name='display_event_details'),
+    # start event and stop event
+    path('start/event/<str:event_id>/',views.start_event,name='start_event'),
+    path('stop/event/<str:event_id>/',views.stop_event,name='stop_event'),
 
 ]
