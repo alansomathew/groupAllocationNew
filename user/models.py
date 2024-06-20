@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class Event(models.Model):
     name=models.CharField(max_length=50)
     description=models.TextField()
-    code=models.TextField()
+    code=models.TextField(unique=True)
     participants=models.IntegerField()
     x_value=models.IntegerField(null=True)
     is_active = models.BooleanField(default=True)
@@ -34,4 +34,10 @@ class TimeMatrix(models.Model):
     group_to = models.ForeignKey(Group, related_name='to_group', on_delete=models.CASCADE)
     travel_time = models.FloatField()  # Represents the travel time between the two groups (in seconds)
 
+class Particpant(models.Model):
+    name=models.CharField(max_length=255)
+    event=models.ForeignKey(Event,on_delete=models.CASCADE)
+    created_on=models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    is_assigned = models.BooleanField(default=False)
 

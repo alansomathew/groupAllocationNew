@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
-
+from user.models import Event,Particpant
 
 # Create your views here.
 
@@ -68,3 +68,19 @@ def signup(request):
         messages.error(request, 'Error viewing data!')
         return render(request, 'Guest/Signup.html')
 
+def participate(request):
+    try:
+        if request.method == 'POST':
+            user_id = request.session.get('name')
+            event_id = request.POST.get('event_code')
+            event = Event.objects.get(code=event_id)
+            participant = Particpant(name=user_id, event=event)
+            participant.save()
+            messages.success(request, 'You have successfully participated in the event!')
+            return redirect('index')
+        else:
+            return render(request, 'user/participate.html')
+    except Exception as e:
+        print(e)
+        messages.error(request, 'Error viewing data!')
+        return render(request, 'user/participate.html')

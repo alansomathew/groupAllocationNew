@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home{% endblock title %}
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+
+{% block content %}
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6">
+                <!-- section title -->
+                <div class="title text-center">
+                    <h2>Events</h2>
+                    <p> </p>
+                    <div class="border"></div>
+                </div>
+                <!-- /section title -->
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Event Code</label>
+                        <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                            placeholder="Enter Event Name" name="event_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="participantName">Participant Name</label>
+                        <input type="text" class="form-control" id="participantName" aria-describedby="emailHelp"
+                            placeholder="Enter Participant Name" name="name">
+                    </div>
+                    <div class="form-group" id="totalCapacityRow" style="display: none;">
+                        <label for="PrivateCode">Event Name</label>
+                        <input type="text" class="form-control" id="PrivateCode" aria-describedby="emailHelp"
+                            placeholder="Enter Event Name" name="event_name">
+                    </div>
+                   <!-- submit button -->
+                    <button type="submit" class="btn btn-primary">Join Event</button>
+
+                        
+                      
+     
+                   
+                    <!--  -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert  {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-danger {% elif message.tags == 'warning' %} alert-warning {% endif %} alert-dismissible fade show"
+                        data-timeout="3000" role="alert">
+                        {{message}}
+                        <button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascripts %}
+
+{% endblock javascripts %}
