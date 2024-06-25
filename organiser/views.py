@@ -201,7 +201,7 @@ def start_event(request, event_id):
     event.is_active = True
     event.save()
     messages.success(request, 'Event started successfully.')
-    return redirect('event_details', event_id=event_id)
+    return redirect('display_event_details', event_id=event_id)
 
 
 def stop_event(request, event_id):
@@ -209,7 +209,7 @@ def stop_event(request, event_id):
     event.is_active = False
     event.save()
     messages.success(request, 'Event stopped successfully.')
-    return redirect('event_details', event_id=event_id)
+    return redirect('display_event_details', event_id=event_id)
 
 
 @login_required
@@ -267,3 +267,10 @@ def participants_view(request, event_id):
     return render(request, 'organiser/view_participants.html', {'event': event, 'participants': participants})
 
 # Assuming you have a method to calculate the happiness matrix
+def delete_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    event.delete()
+    messages.success(request, 'Event deleted successfully.')
+    return redirect('home')  # Redirect to the home page or any other relevant page
+
+   

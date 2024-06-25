@@ -17,5 +17,6 @@ urlpatterns = [
      path('time-details/<int:event_id>/', views.time_details_view, name='time_details'),
     path('happiness-matrix/<int:event_id>/', views.happiness_matrix_view, name='happiness_matrix'),
     path('participants/<int:event_id>/', views.participants_view, name='participants'),
+    path('event/<int:event_id>/delete/', views.delete_event, name='delete_event'),
 
 ]
