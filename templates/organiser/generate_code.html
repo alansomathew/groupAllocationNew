@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock title %}
+{% block stylesheets %}
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!--
+Start About Section
+==================================== -->
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6">
+                <!-- section title -->
+                <div class="title text-center">
+                    <h2> {{event.name}}</h2>
+                    <p> </p>
+                    <div class="border"></div>
+                </div>
+                <!-- /section title -->
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+
+                
+                <div id="printableDiv" class="table-responsive">
+                    <h2 class="mt-3 text-center">Participant Codes</h2>
+                    <table border="1" align="center" cellpadding="10" class="mt-3 table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Code</th>
+
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+
+                            {% for code in codes %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ code.code }} </td>
+                                <td> {% if code.status %} Used {% else %} Not Used {% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <button onclick="printDiv('printableDiv')" class="btn btn-primary">Print</button>
+
+               <div class="">
+                <!-- form -->
+                 <form class="mt-5" action="" method="POST">
+                    {% csrf_token %}
+                    <input type="number" id="additional_codes" name="additional_codes" min="0" value="0" >
+                    <button type="submit" class="btn btn-primary">Generate Codes</button>
+                    
+                   
+                </form>
+               </div>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class=" mt-3 alert  {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-danger {% elif message.tags == 'warning' %} alert-warning {% endif %} alert-dismissible fade show"
+                    data-timeout="3000" role="alert">
+                    {{message}}
+                    <button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div> <!-- End row -->
+    </div> <!-- End container -->
+</section> <!-- End section -->
+
+
+{% endblock content %}
+
+
+{% block javascripts %}
+<script>
+    function printDiv(divName) {
+        var printContents = document.getElementById(divName).innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        document.body.innerHTML = printContents;
+
+        window.print();
+
+        document.body.innerHTML = originalContents;
+    }
+</script>
+
+{% endblock javascripts %}

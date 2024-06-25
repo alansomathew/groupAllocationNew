@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
-from user.models import Event,Particpant
+from user.models import Event,Particpant, PrivateCodes
 
 # Create your views here.
 
@@ -69,18 +69,47 @@ def signup(request):
         return render(request, 'Guest/Signup.html')
 
 def participate(request):
-    try:
+    # try:
         if request.method == 'POST':
-            user_id = request.session.get('name')
-            event_id = request.POST.get('event_code')
-            event = Event.objects.get(code=event_id)
-            participant = Particpant(name=user_id, event=event)
-            participant.save()
+            user_id = request.POST.get('participantName')
+            event_code = request.POST.get('event_code')
+            participant_code = request.POST.get('participantCode')
+            
+            # Get the event
+            try:
+                eventObj = Event.objects.get(code=event_code, is_active=True,)
+            except Event.DoesNotExist:
+                messages.error(request, 'Invalid or inactive event code!')
+                return render(request, 'user/participate.html')
+
+            # Check if the private code exists for the event
+            private_code_obj = PrivateCodes.objects.filter(event=eventObj, code=participant_code).first()
+            if not private_code_obj:
+                messages.error(request, 'Invalid participant code!')
+                return render(request, 'user/participate.html')
+
+            # Check if the user has already registered for this event with the same private code
+            user_exists = Particpant.objects.filter(privatecode=participant_code, name=user_id, event=eventObj).exists()
+            if user_exists:
+                messages.warning(request, 'You have already registered for this event with the same private code.')
+                return render(request, 'user/participate.html')
+           
+
+            # Check if the private code is already used
+            if private_code_obj.status:
+                messages.warning(request, 'The private code is already used.')
+                return render(request, 'user/participate.html')
+
+            # Create a new participant
+            Particpant.objects.create(name=user_id, event=eventObj, privatecode=participant_code)
+            private_code_obj.status = True
+            private_code_obj.save()
             messages.success(request, 'You have successfully participated in the event!')
-            return redirect('index')
+            return redirect("participate")
+
         else:
             return render(request, 'user/participate.html')
-    except Exception as e:
-        print(e)
-        messages.error(request, 'Error viewing data!')
-        return render(request, 'user/participate.html')
+    # except Exception as e:
+    #     print(e)
+    #     messages.error(request, 'Error viewing data!')
+    #     return render(request, 'user/participate.html')

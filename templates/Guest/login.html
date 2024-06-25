@@ -75,6 +75,16 @@
                                     </div>
                                     <button type="submit" class="btn btn-theme">Login</button>
                                 </form>
+
+                                {% if messages %}
+                                {% for message in messages %}
+                                <div class="mt-3 alert  {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-danger {% elif message.tags == 'warning' %} alert-warning {% endif %} alert-dismissible fade show"
+                                    data-timeout="3000" role="alert">
+                                    {{message}}
+                                    <button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
                             </div>
                         </div>
 
@@ -84,7 +94,7 @@
                                 <div class="account-testimonial">
                                     <!-- <h4 class="text-white mb-4">This  beautiful theme yours!</h4> -->
                                     <p class="lead text-white">"Best investment i made for a long time. Can only recommend it for other users."</p>
-                                    <p>- Admin User</p>
+                                    <p>-Groupy</p>
                                 </div>
                             </div>
                         </div>

@@ -14,6 +14,11 @@ class Event(models.Model):
     created_by=models.ForeignKey(User,on_delete=models.CASCADE)
     created_on=models.DateTimeField(auto_now_add=True)
 
+class PrivateCodes(models.Model):
+    event=models.ForeignKey(Event,on_delete=models.CASCADE)
+    code=models.CharField(max_length=50,unique=True)
+    status=models.BooleanField(default=False)
+
 class Levels(models.Model):
     event=models.ForeignKey(Event,on_delete=models.CASCADE)
     name=models.CharField(max_length=50)
@@ -37,7 +42,9 @@ class TimeMatrix(models.Model):
 class Particpant(models.Model):
     name=models.CharField(max_length=255)
     event=models.ForeignKey(Event,on_delete=models.CASCADE)
+    privatecode = models.TextField(max_length=50, default="")
     created_on=models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_assigned = models.BooleanField(default=False)
+
 

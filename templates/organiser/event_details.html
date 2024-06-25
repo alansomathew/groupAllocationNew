@@ -21,7 +21,7 @@ Start About Section
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center mt-5">
+        <!-- <div class="row justify-content-center mt-5">
             <div class="col-lg-12">
 
                 {% for level in levels %}
@@ -59,14 +59,14 @@ Start About Section
             </div>
 
             <div class="col-lg-6">
-                <h3>Happiness Matrix</h3>
+                <h3>Happiness Matrix</h3> -->
 
 
-                <!-- {{happiness_matrix}} -->
+        <!-- {{happiness_matrix}} -->
 
 
 
-                <table cellpadding="10">
+        <!-- <table cellpadding="10">
                     <tbody>
 
                         {% for row in happiness_matrix %}
@@ -81,17 +81,57 @@ Start About Section
                     </tbody>
                 </table>
             </div>
+        </div> -->
+
+        <div class="table-responsive">
+            <table border="1" align="center" cellpadding="10" class="mt-3 table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Event Code</th>
+
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    <tr>
+                        <td>{{event.code}}</td>
+
+                        <td>
+                            <a href="{% url 'generate_codes' event.id %}">Generate Code</a> |
+
+                            <a href="{% url 'time_details' event.id %}">Time Details</a> |
+                            <a href="{% url 'happiness_matrix' event.id %}">Happiness Matrix</a> |
+                            <a href="{% url 'participants' event.id %}">Participants</a> |
+
+                            <a href="">Preferences</a> |
+                            {% if event.is_active %}
+
+                            <a href="{% url 'start_event' event.id %}">Stop Event</a> |
+                            {% else %}
+                            <a href="{% url 'stop_event' event.id %}">Start Event</a> |
+
+                            {% endif %}
+
+                            <a href="">Results</a> |
+                            <a href="">Delete Event</a>
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
         </div>
 
-        {% if event.is_active %}
 
-        <a href="{% url 'start_event' event.id %}">Stop</a>
-        {% else %}
-        <a href="{% url 'stop_event' event.id %}">Start</a>
-
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert  {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-danger {% elif message.tags == 'warning' %} alert-warning {% endif %} alert-dismissible fade show"
+            data-timeout="3000" role="alert">
+            {{message}}
+            <button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
         {% endif %}
-
-
     </div>
 </section> <!-- End section -->
 
