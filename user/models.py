@@ -9,7 +9,7 @@ class Event(models.Model):
     code=models.TextField(unique=True)
     participants=models.IntegerField()
     x_value=models.IntegerField(null=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
     created_by=models.ForeignKey(User,on_delete=models.CASCADE)
     created_on=models.DateTimeField(auto_now_add=True)
@@ -39,7 +39,7 @@ class TimeMatrix(models.Model):
     group_to = models.ForeignKey(Group, related_name='to_group', on_delete=models.CASCADE)
     travel_time = models.FloatField()  # Represents the travel time between the two groups (in seconds)
 
-class Particpant(models.Model):
+class Participant(models.Model):
     name=models.CharField(max_length=255)
     event=models.ForeignKey(Event,on_delete=models.CASCADE)
     privatecode = models.TextField(max_length=50, default="")
@@ -47,4 +47,9 @@ class Particpant(models.Model):
     is_active = models.BooleanField(default=True)
     is_assigned = models.BooleanField(default=False)
 
+
+class Interest(models.Model):
+    from_participant = models.ForeignKey(Participant, related_name='expressed_interests', on_delete=models.CASCADE)
+    to_participant = models.ForeignKey(Participant, related_name='received_interests', on_delete=models.CASCADE)
+    is_interested = models.BooleanField(default=False)
 

@@ -1,0 +1,59 @@
+<!-- templates/organizer/participants_interests.html -->
+
+{% extends 'base.html' %}
+{% block title %}Participants Interests{% endblock title %}
+
+{% block content %}
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="title text-center">
+                    <h2>{{ event.name }} - Participants and Their Interests</h2>
+                    <p></p>
+                    <div class="border"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Participant</th>
+                            <th>Interests</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for participant, interests in participants_with_interests %}
+                        <tr>
+                            <td>{{ participant.name }}</td>
+                            <td>
+                                {% if interests %}
+                                <ul>
+                                    {% for interest in interests %}
+                                    <li>{{ interest.to_participant.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <span>No interests expressed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert  {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-danger {% elif message.tags == 'warning' %} alert-warning {% endif %} alert-dismissible fade show"
+            data-timeout="3000" role="alert">
+            {{message}}
+            <button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Participant List - {{ event.name }}{% endblock title %}
+
+{% block content %}
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="title text-center">
+                    <h2>{{ event.name }} Participant List</h2>
+                    <div class="border"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for participant in participants %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ participant.name }}</td>
+                            <td>
+                                {% if participant.id != current_participant.id %}
+                                {% if participant in interested_participants %}
+                                <span class="text-success">Interested</span>
+                                {% else %}
+                                <a href="{% url 'express_interest' participant.id %}" class="btn btn-sm btn-primary">Express Interest</a>
+                                {% endif %}
+
+
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No participants found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Display messages -->
+        {% if messages %}
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

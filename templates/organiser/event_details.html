@@ -103,7 +103,7 @@ Start About Section
                             <a href="{% url 'happiness_matrix' event.id %}">Happiness Matrix</a> |
                             <a href="{% url 'participants' event.id %}">Participants</a> |
 
-                            <a href="">Preferences</a> |
+                            <a href="{% url 'participants_interests'  event.id %}">Preferences</a> |
                             {% if event.is_active %}
 
                             <a href="{% url 'stop_event' event.id %}">Stop Event</a> |

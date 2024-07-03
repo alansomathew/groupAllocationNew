@@ -13,10 +13,11 @@ urlpatterns = [
     # start event and stop event
     path('start/event/<str:event_id>/',views.start_event,name='start_event'),
     path('stop/event/<str:event_id>/',views.stop_event,name='stop_event'),
-    path('generate-codes/<int:event_id>/', views.generate_codes_view, name='generate_codes'),
-     path('time-details/<int:event_id>/', views.time_details_view, name='time_details'),
-    path('happiness-matrix/<int:event_id>/', views.happiness_matrix_view, name='happiness_matrix'),
-    path('participants/<int:event_id>/', views.participants_view, name='participants'),
-    path('event/<int:event_id>/delete/', views.delete_event, name='delete_event'),
+    path('generate-codes/<str:event_id>/', views.generate_codes_view, name='generate_codes'),
+     path('time-details/<str:event_id>/', views.time_details_view, name='time_details'),
+    path('happiness-matrix/<str:event_id>/', views.happiness_matrix_view, name='happiness_matrix'),
+    path('participants/<str:event_id>/', views.participants_view, name='participants'),
+    path('event/<str:event_id>/delete/', views.delete_event, name='delete_event'),
+    path('event/<str:event_id>/participants-interests/', views.participants_interests, name='participants_interests'),
 
 ]

@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from organiser.utils import generate_code
-from user.models import Event, Group, Levels, Particpant, PrivateCodes, TimeMatrix
+from user.models import Event, Group, Interest, Levels, Participant, PrivateCodes, TimeMatrix
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -156,12 +156,12 @@ def create_happiness_matrix(event_id):
     # Create header row
     header_row = [" "]
     for group in groups:
-        header_row.append("group " + str(group.id))
+        header_row.append( str(group.name))
     happiness_matrix.append(header_row)
 
     # Populate matrix rows
     for i, group_i in enumerate(groups):
-        row = ["group " + str(group_i.id)]
+        row = [str(group_i.name)]
         for j, group_j in enumerate(groups):
             if i == j:
                 row.append(x_value)
@@ -263,7 +263,7 @@ def happiness_matrix_view(request, event_id):
 @login_required
 def participants_view(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    participants = Particpant.objects.filter(event=event)
+    participants = Participant.objects.filter(event=event)
     return render(request, 'organiser/view_participants.html', {'event': event, 'participants': participants})
 
 # Assuming you have a method to calculate the happiness matrix
@@ -273,4 +273,17 @@ def delete_event(request, event_id):
     messages.success(request, 'Event deleted successfully.')
     return redirect('home')  # Redirect to the home page or any other relevant page
 
-   
+def participants_interests(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    participants = Participant.objects.filter(event=event)
+
+    participants_with_interests = []
+    for participant in participants:
+        interests = Interest.objects.filter(from_participant=participant)
+        participants_with_interests.append((participant, interests))
+
+    context = {
+        'event': event,
+        'participants_with_interests': participants_with_interests,
+    }
+    return render(request, 'organiser/preference.html', context)
