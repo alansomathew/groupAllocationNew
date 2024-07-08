@@ -156,7 +156,7 @@ def create_happiness_matrix(event_id):
     # Create header row
     header_row = [" "]
     for group in groups:
-        header_row.append( str(group.name))
+        header_row.append(str(group.name))
     happiness_matrix.append(header_row)
 
     # Populate matrix rows
@@ -174,7 +174,6 @@ def create_happiness_matrix(event_id):
         happiness_matrix.append(row)
 
     return happiness_matrix
-
 
 
 def display_event_details(request, event_id):
@@ -241,15 +240,17 @@ def generate_codes_view(request, event_id):
         return redirect(reverse('generate_codes', args=[event_id]))
     else:
         codes = PrivateCodes.objects.filter(event=event)
-        return render(request, 'organiser/generate_code.html', {'event': event, 'codes': codes})
+        participate_base_url = request.build_absolute_uri(
+            reverse('participate'))
+        return render(request, 'organiser/generate_code.html', {'event': event, 'codes': codes, 'participate_base_url': participate_base_url})
 
 
 def time_details_view(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    groups = Group.objects.filter(level__event=event)  # Get all groups related to the event
+    # Get all groups related to the event
+    groups = Group.objects.filter(level__event=event)
     time_matrix = TimeMatrix.objects.all()  # Get all time matrix data
     return render(request, 'organiser/time_details.html', {'event': event, 'groups': groups, 'time_matrix': time_matrix})
-
 
 
 @login_required
@@ -267,11 +268,15 @@ def participants_view(request, event_id):
     return render(request, 'organiser/view_participants.html', {'event': event, 'participants': participants})
 
 # Assuming you have a method to calculate the happiness matrix
+
+
 def delete_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     event.delete()
     messages.success(request, 'Event deleted successfully.')
-    return redirect('home')  # Redirect to the home page or any other relevant page
+    # Redirect to the home page or any other relevant page
+    return redirect('home')
+
 
 def participants_interests(request, event_id):
     event = get_object_or_404(Event, id=event_id)

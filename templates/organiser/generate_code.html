@@ -49,6 +49,7 @@ Start About Section
                                 <th>Code</th>
 
                                 <th>Status</th>
+                                <th>Participate Link</th>
                             </tr>
                         </thead>
                         <tbody class="table-group-divider">
@@ -58,6 +59,9 @@ Start About Section
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ code.code }} </td>
                                 <td> {% if code.status %} Used {% else %} Not Used {% endif %}</td>
+                                <td>
+                                    <a href="{{ participate_base_url }}?event_code={{ event.code }}&participant_code={{ code.code }}" target="_blank">Participate Link</a>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

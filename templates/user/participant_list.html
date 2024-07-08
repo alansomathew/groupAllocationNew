@@ -30,7 +30,7 @@
                             <td>
                                 {% if participant.id != current_participant.id %}
                                 {% if participant in interested_participants %}
-                                <span class="text-success">Interested</span>
+                                <a href="{% url 'remove_interest' participant.id %}" class="btn btn-sm btn-danger">Remove Interest</a>
                                 {% else %}
                                 <a href="{% url 'express_interest' participant.id %}" class="btn btn-sm btn-primary">Express Interest</a>
                                 {% endif %}

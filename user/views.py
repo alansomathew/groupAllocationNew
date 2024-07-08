@@ -116,9 +116,10 @@ def participate(request):
             request.session['participant_id'] = participant.id
 
             return redirect("participant_list", event_id=event_obj.id)
-
         else:
-            return render(request, 'user/participate.html')
+            event_code = request.GET.get('event_code', '')
+            participant_code = request.GET.get('participant_code', '')
+            return render(request, 'user/participate.html', {'event_code': event_code, 'participant_code': participant_code})
 
     except Exception as e:
         print(e)
@@ -133,14 +134,18 @@ def participant_list(request, event_id):
 
         # Fetch current participant based on session information
         current_participant_id = request.session.get('participant_id')
-        current_participant = get_object_or_404(Participant, id=current_participant_id)
+        current_participant = get_object_or_404(
+            Participant, id=current_participant_id)
 
         # Exclude current participant from the list
-        participants = Participant.objects.filter(event=event).exclude(id=current_participant.id)
+        participants = Participant.objects.filter(
+            event=event).exclude(id=current_participant.id)
 
         # Fetch interests for the current participant
-        interests = Interest.objects.filter(from_participant=current_participant, to_participant__event=event)
-        interested_participants = [interest.to_participant for interest in interests]
+        interests = Interest.objects.filter(
+            from_participant=current_participant, to_participant__event=event)
+        interested_participants = [
+            interest.to_participant for interest in interests]
 
         context = {
             'event': event,
@@ -152,11 +157,13 @@ def participant_list(request, event_id):
 
     except Event.DoesNotExist:
         messages.error(request, 'Event not found.')
-        return redirect('home')  # Redirect to home page or handle appropriately
+        # Redirect to home page or handle appropriately
+        return redirect('home')
 
     except Participant.DoesNotExist:
         messages.error(request, 'Participant not found.')
-        return redirect('home')  # Redirect to home page or handle appropriately
+        # Redirect to home page or handle appropriately
+        return redirect('home')
 
 
 def express_interest(request, participant_id):
@@ -166,15 +173,43 @@ def express_interest(request, participant_id):
 
         # Fetch current participant based on session information
         current_participant_id = request.session.get('participant_id')
-        from_participant = get_object_or_404(Participant, id=current_participant_id)
+        from_participant = get_object_or_404(
+            Participant, id=current_participant_id)
 
         # Check if interest already exists
         if Interest.objects.filter(from_participant=from_participant, to_participant=to_participant).exists():
-            messages.warning(request, 'You have already expressed interest in this participant.')
+            messages.warning(
+                request, 'You have already expressed interest in this participant.')
         else:
             # Create new interest instance
-            interest = Interest.objects.create(from_participant=from_participant, to_participant=to_participant, is_interested=True)
-            messages.success(request, 'You have expressed interest in this participant.')
+            interest = Interest.objects.create(
+                from_participant=from_participant, to_participant=to_participant, is_interested=True)
+            messages.success(
+                request, 'You have expressed interest in this participant.')
+
+    except Participant.DoesNotExist:
+        messages.error(request, 'Participant not found.')
+
+    return redirect('participant_list', event_id=from_participant.event.id)
+
+
+def remove_interest(request, participant_id):
+    try:
+        to_participant = get_object_or_404(Participant, id=participant_id)
+        current_participant_id = request.session.get('participant_id')
+        from_participant = get_object_or_404(
+            Participant, id=current_participant_id)
+
+        # Find the interest and delete it
+        interest = Interest.objects.filter(
+            from_participant=from_participant, to_participant=to_participant).first()
+        if interest:
+            interest.delete()
+            messages.success(
+                request, 'You have removed your interest in this participant.')
+        else:
+            messages.warning(
+                request, 'You have not expressed interest in this participant.')
 
     except Participant.DoesNotExist:
         messages.error(request, 'Participant not found.')
