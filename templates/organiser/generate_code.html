@@ -39,7 +39,7 @@ Start About Section
 
             <div class="col-md-12">
 
-                
+
                 <div id="printableDiv" class="table-responsive">
                     <h2 class="mt-3 text-center">Participant Codes</h2>
                     <table border="1" align="center" cellpadding="10" class="mt-3 table table-striped align-middle">
@@ -50,6 +50,7 @@ Start About Section
 
                                 <th>Status</th>
                                 <th>Participate Link</th>
+                                <td>QR Code</td>
                             </tr>
                         </thead>
                         <tbody class="table-group-divider">
@@ -60,7 +61,10 @@ Start About Section
                                 <td>{{ code.code }} </td>
                                 <td> {% if code.status %} Used {% else %} Not Used {% endif %}</td>
                                 <td>
-                                    <a href="{{ participate_base_url }}?event_code={{ event.code }}&participant_code={{ code.code }}" target="_blank">Participate Link</a>
+                                    <a href="{{ participate_base_url }}?event_code={{ event.code }}&participant_code={{ code.code }}" target="_blank" class="participate-link">Participate Link</a>
+                                </td>
+                                <td>
+                                    <div id="qrcode-{{ forloop.counter }}"></div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -70,16 +74,16 @@ Start About Section
 
                 <button onclick="printDiv('printableDiv')" class="btn btn-primary">Print</button>
 
-               <div class="">
-                <!-- form -->
-                 <form class="mt-5" action="" method="POST">
-                    {% csrf_token %}
-                    <input type="number" id="additional_codes" name="additional_codes" min="0" value="0" >
-                    <button type="submit" class="btn btn-primary">Generate Codes</button>
-                    
-                   
-                </form>
-               </div>
+                <div class="">
+                    <!-- form -->
+                    <form class="mt-5" action="" method="POST">
+                        {% csrf_token %}
+                        <input type="number" id="additional_codes" name="additional_codes" min="0" value="0">
+                        <button type="submit" class="btn btn-primary">Generate Codes</button>
+
+
+                    </form>
+                </div>
 
                 {% if messages %}
                 {% for message in messages %}
@@ -100,6 +104,8 @@ Start About Section
 
 
 {% block javascripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
     function printDiv(divName) {
         var printContents = document.getElementById(divName).innerHTML;
@@ -111,6 +117,21 @@ Start About Section
 
         document.body.innerHTML = originalContents;
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const links = document.querySelectorAll('.participate-link');
+
+        links.forEach((link, index) => {
+            const url = link.href;
+            const qrcodeContainer = document.getElementById(`qrcode-${index + 1}`);
+
+            new QRCode(qrcodeContainer, {
+                text: url,
+                width: 128,
+                height: 128
+            });
+        });
+    });
 </script>
 
 {% endblock javascripts %}
