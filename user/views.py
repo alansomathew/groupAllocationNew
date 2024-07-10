@@ -79,9 +79,9 @@ def participate(request):
 
             # Get the event
             try:
-                event_obj = Event.objects.get(code=event_code)
+                event_obj = Event.objects.get(code=event_code,is_private=True)
             except Event.DoesNotExist:
-                messages.error(request, 'Invalid event code!')
+                messages.error(request, 'The Event is Stopped!')
                 return render(request, 'user/participate.html')
 
             # Check if the private code exists for the event

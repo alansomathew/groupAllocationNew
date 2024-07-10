@@ -198,6 +198,7 @@ def display_event_details(request, event_id):
 def start_event(request, event_id):
     event = Event.objects.get(id=event_id)
     event.is_active = True
+    event.is_private=False
     event.save()
     messages.success(request, 'Event started successfully.')
     return redirect('display_event_details', event_id=event_id)
@@ -206,6 +207,7 @@ def start_event(request, event_id):
 def stop_event(request, event_id):
     event = Event.objects.get(id=event_id)
     event.is_active = False
+    event.is_private=True
     event.save()
     messages.success(request, 'Event stopped successfully.')
     return redirect('display_event_details', event_id=event_id)
