@@ -79,9 +79,9 @@ def participate(request):
 
             # Get the event
             try:
-                event_obj = Event.objects.get(code=event_code, is_active=True)
+                event_obj = Event.objects.get(code=event_code)
             except Event.DoesNotExist:
-                messages.error(request, 'Invalid or inactive event code!')
+                messages.error(request, 'Invalid event code!')
                 return render(request, 'user/participate.html')
 
             # Check if the private code exists for the event
@@ -101,8 +101,11 @@ def participate(request):
                 # Store participant ID in session for further interactions
                 request.session['participant_id'] = participant.id
 
-                # Redirect to participant list to view and edit interests
-                return redirect("participant_list", event_id=event_obj.id)
+                # Redirect based on event status
+                if event_obj.is_active:
+                    return redirect("participant_list", event_id=event_obj.id)
+                else:
+                    return render(request, 'user/participate.html')
 
             # Check if the private code is already used
             if private_code_obj.status:
@@ -115,12 +118,17 @@ def participate(request):
             private_code_obj.status = True
             private_code_obj.save()
             messages.success(
-                request, 'You have successfully participated in the event!')
+                request, 'You have successfully registered for the event!')
 
             # Store participant ID in session for further interactions
             request.session['participant_id'] = participant.id
 
-            return redirect("participant_list", event_id=event_obj.id)
+            # Redirect based on event status
+            if event_obj.is_active:
+                return redirect("participant_list", event_id=event_obj.id)
+            else:
+                return render(request, 'user/participate.html')
+
         else:
             event_code = request.GET.get('event_code', '')
             participant_code = request.GET.get('participant_code', '')
@@ -128,7 +136,7 @@ def participate(request):
 
     except Exception as e:
         print(e)
-        messages.error(request, 'Error viewing data!')
+        messages.error(request, 'Error registering for the event!')
         return render(request, 'user/participate.html')
 
 
