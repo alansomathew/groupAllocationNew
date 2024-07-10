@@ -92,12 +92,17 @@ def participate(request):
                 return render(request, 'user/participate.html')
 
             # Check if the user has already registered for this event with the same private code
-            user_exists = Participant.objects.filter(
-                privatecode=participant_code, name=user_id, event=event_obj).exists()
-            if user_exists:
+            participant = Participant.objects.filter(
+                privatecode=participant_code, name=user_id, event=event_obj).first()
+            if participant:
                 messages.warning(
                     request, 'You have already registered for this event with the same private code.')
-                return render(request, 'user/participate.html')
+
+                # Store participant ID in session for further interactions
+                request.session['participant_id'] = participant.id
+
+                # Redirect to participant list to view and edit interests
+                return redirect("participant_list", event_id=event_obj.id)
 
             # Check if the private code is already used
             if private_code_obj.status:
