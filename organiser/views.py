@@ -1,9 +1,13 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from organiser.utils import generate_code
 from user.models import Event, Group, Interest, Levels, Participant, PrivateCodes, TimeMatrix
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from collections import defaultdict
+from pulp import LpMaximize, LpProblem, LpVariable, lpSum, value, PULP_CBC_CMD
+import numpy as np
 
 # Create your views here.
 
@@ -137,8 +141,7 @@ def add_x_value(request, id):
         return render(request, 'organiser/x_value.html')
 
 
-def create_happiness_matrix(event_id):
-    event = Event.objects.get(id=event_id)
+def create_happiness_matrix(event):
     x_value = event.x_value
     levels = Levels.objects.filter(event=event)
     groups = Group.objects.filter(level__in=levels).order_by('id')
@@ -151,29 +154,19 @@ def create_happiness_matrix(event_id):
             for t in TimeMatrix.objects.filter(group_from=group)
         }
 
-    happiness_matrix = []
-
-    # Create header row
-    header_row = [" "]
-    for group in groups:
-        header_row.append(str(group.name))
-    happiness_matrix.append(header_row)
-
-    # Populate matrix rows
+    happiness_matrix = np.zeros((len(groups), len(groups)))
     for i, group_i in enumerate(groups):
-        row = [str(group_i.name)]
         for j, group_j in enumerate(groups):
             if i == j:
-                row.append(x_value)
+                happiness_matrix[i, j] = x_value
             else:
                 travel_time = travel_times[group_i.id].get(group_j.id, 0)
                 if travel_time != 0:
-                    row.append(x_value / travel_time)
+                    happiness_matrix[i, j] = x_value / travel_time
                 else:
-                    row.append(0)
-        happiness_matrix.append(row)
+                    happiness_matrix[i, j] = 0
 
-    return happiness_matrix
+    return happiness_matrix, groups
 
 
 def display_event_details(request, event_id):
@@ -294,3 +287,86 @@ def participants_interests(request, event_id):
         'participants_with_interests': participants_with_interests,
     }
     return render(request, 'organiser/preference.html', context)
+
+def calculate_happiness_matrix_for_participants(participants, happiness_matrix, group_indices):
+    participant_happiness_matrix = defaultdict(dict)
+
+    for participant, prefs in participants.items():
+        for group in group_indices:
+            happiness = 0
+            for pref in prefs:
+                if pref in participants:
+                    preferred_group_index = group_indices[group]
+                    happiness += happiness_matrix[group_indices[group], preferred_group_index]
+            participant_happiness_matrix[participant][group] = happiness
+
+    return participant_happiness_matrix
+
+def solve_ilp(groups, participants, happiness_matrix):
+    group_indices = {group.name: idx for idx, group in enumerate(groups)}
+    participant_happiness_matrix = calculate_happiness_matrix_for_participants(participants, happiness_matrix, group_indices)
+
+    prob = LpProblem("Maximize_Happiness", LpMaximize)
+
+    x = LpVariable.dicts("x", ((p, g) for p in participants for g in group_indices), 0, 1, cat='Binary')
+
+    # Objective function
+    prob += lpSum(participant_happiness_matrix[p][g] * x[p, g] for p in participants for g in group_indices)
+
+    # Constraints
+    for g in group_indices:
+        prob += lpSum(x[p, g] for p in participants) <= groups[group_indices[g]].capacity, f"Capacity_{g}"  # Capacity constraint
+
+    for p in participants:
+        prob += lpSum(x[p, g] for g in group_indices) == 1, f"Assignment_{p}"  # Each participant must be assigned to exactly one group
+
+    # Solve the problem
+    solver = PULP_CBC_CMD(msg=True)
+    prob.solve(solver)
+
+    allocation = defaultdict(list)
+    for p in participants:
+        for g in group_indices:
+            if value(x[p, g]) == 1:
+                allocation[g].append(p)
+                break
+        else:
+            allocation["not_allocated"].append(p)
+
+    return allocation
+
+def allocate_participants(event_id):
+    event = Event.objects.get(id=event_id)
+    happiness_matrix, groups = create_happiness_matrix(event)
+
+    # Fetch participants and their preferences
+    participants_qs = Participant.objects.filter(event=event)
+    participants = {}
+    for participant in participants_qs:
+        interests = Interest.objects.filter(from_participant=participant, is_interested=True)
+        preferences = [interest.to_participant.name for interest in interests]
+        participants[participant.name] = preferences
+
+    allocation = solve_ilp(groups, participants, happiness_matrix)
+
+    return allocation, groups
+
+def run_allocation(request, event_id):
+    allocation, groups = allocate_participants(event_id)
+    
+    # Store results in the session or cache
+    request.session['allocation'] = allocation
+
+    return JsonResponse({'status': 'success', 'message': 'Allocation completed successfully.'})
+
+def view_allocation(request, event_id):
+    allocation = request.session.get('allocation', {})
+    event = get_object_or_404(Event, id=event_id)
+    groups = Group.objects.filter(level__event=event)
+    
+    context = {
+        'event': event,
+        'groups': groups,
+        'allocation': allocation,
+    }
+    return render(request, 'allocation_results.html', context)
