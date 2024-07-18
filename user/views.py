@@ -79,7 +79,7 @@ def participate(request):
 
             # Get the event
             try:
-                event_obj = Event.objects.get(code=event_code,is_private=True)
+                event_obj = Event.objects.get(code=event_code,is_private=False)
             except Event.DoesNotExist:
                 messages.error(request, 'The Event is Stopped!')
                 return render(request, 'user/participate.html')
