@@ -141,7 +141,9 @@ def add_x_value(request, id):
         return render(request, 'organiser/x_value.html')
 
 
-def create_happiness_matrix(event):
+
+def create_happiness_matrix(event_id):
+    event = Event.objects.get(id=event_id)
     x_value = event.x_value
     levels = Levels.objects.filter(event=event)
     groups = Group.objects.filter(level__in=levels).order_by('id')
@@ -166,7 +168,7 @@ def create_happiness_matrix(event):
                 else:
                     happiness_matrix[i, j] = 0
 
-    return happiness_matrix, groups
+    return happiness_matrix
 
 
 def display_event_details(request, event_id):
@@ -335,9 +337,11 @@ def solve_ilp(groups, participants, happiness_matrix):
 
     return allocation
 
-def allocate_participants(event_id):
+def allocate_participants(request, event_id):
     event = Event.objects.get(id=event_id)
-    happiness_matrix, groups = create_happiness_matrix(event)
+    levels = Levels.objects.filter(event=event)
+    groups = Group.objects.filter(level__in=levels)
+    happiness_matrix = create_happiness_matrix(event_id)
 
     # Fetch participants and their preferences
     participants_qs = Participant.objects.filter(event=event)
@@ -349,24 +353,24 @@ def allocate_participants(event_id):
 
     allocation = solve_ilp(groups, participants, happiness_matrix)
 
-    return allocation, groups
-
-def run_allocation(request, event_id):
-    allocation, groups = allocate_participants(event_id)
-    
-    # Store results in the session or cache
-    request.session['allocation'] = allocation
-
-    return JsonResponse({'status': 'success', 'message': 'Allocation completed successfully.'})
-
-def view_allocation(request, event_id):
+    request.session['allocation'] = dict(allocation)  # Convert defaultdict to dict
     allocation = request.session.get('allocation', {})
-    event = get_object_or_404(Event, id=event_id)
-    groups = Group.objects.filter(level__event=event)
-    
+
     context = {
         'event': event,
         'groups': groups,
         'allocation': allocation,
     }
-    return render(request, 'allocation_results.html', context)
+    return render(request, 'organiser/allocation_results.html', context)
+
+def view_allocation(request, event_id):
+    allocation = request.session.get('allocation', {})
+    event = get_object_or_404(Event, id=event_id)
+    groups = Group.objects.filter(level__event=event)
+
+    context = {
+        'event': event,
+        'groups': groups,
+        'allocation': allocation,
+    }
+    return render(request, 'organiser/allocation_results.html', context)
