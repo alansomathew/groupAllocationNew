@@ -112,7 +112,9 @@ Start About Section
 
                             {% endif %}
 
-                            <a href="{% url 'run_allocation' event.id %}">Results</a> |
+                            <a href="{% url 'run_allocation' event.id %}">Allocate</a> |
+                            <a href="{% url 'view_allocation' event.id %}">Results</a> |
+                            <a href="{% url 'edit_allocation' event.id %}">Edit Results</a> |
                             <a href="{% url 'delete_event' event.id %}" onclick="return confirmDelete()">Delete</a>
 
 

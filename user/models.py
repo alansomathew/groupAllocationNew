@@ -13,6 +13,7 @@ class Event(models.Model):
     is_private = models.BooleanField(default=False)
     created_by=models.ForeignKey(User,on_delete=models.CASCADE)
     created_on=models.DateTimeField(auto_now_add=True)
+    optimum_happiness = models.FloatField(default=0,null=True)
 
 class PrivateCodes(models.Model):
     event=models.ForeignKey(Event,on_delete=models.CASCADE)
@@ -44,6 +45,7 @@ class Participant(models.Model):
     event=models.ForeignKey(Event,on_delete=models.CASCADE)
     privatecode = models.TextField(max_length=50, default="")
     created_on=models.DateTimeField(auto_now_add=True)
+    group=models.ForeignKey(Group,on_delete=models.CASCADE,null=True,blank=True)
     is_active = models.BooleanField(default=True)
     is_assigned = models.BooleanField(default=False)
 

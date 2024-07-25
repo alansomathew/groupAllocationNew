@@ -21,5 +21,6 @@ urlpatterns = [
     path('event/<str:event_id>/participants-interests/', views.participants_interests, name='participants_interests'),
     path('run_allocation/<str:event_id>/', views.allocate_participants, name='run_allocation'),
     path('view_allocation/<str:event_id>/', views.view_allocation, name='view_allocation'),
+    path('edit_allocation/<str:event_id>/',views.edit_allocation,name="edit_allocation"),
 
 ]

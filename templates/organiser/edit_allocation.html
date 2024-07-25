@@ -1,0 +1,86 @@
+<!-- allocation_results.html -->
+{% extends 'base.html' %}
+{% block title %}Result{% endblock title %}
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% block content %}
+<section class="service-2 section">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6">
+                <!-- section title -->
+                <div class="title text-center">
+                    <h2>Edit Allocation Results for {{ event.name }}</h2>
+                    <p> </p>
+                    <div class="border"></div>
+                </div>
+                <!-- /section title -->
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <table border="1" align="center" cellpadding="10" class="mt-3 table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Participant</th>
+
+                                <th>Room</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+
+
+                            {% for participant in participants %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ participant.name }} </td>
+                                <td>
+                                    <select name="group_{{ participant.id }}" id="group_{{ participant.id }}">
+                                    <option value="">Not Allocated</option>
+                                        {% for room in groups %}
+                                        <option value="{{ room.id }}" {% if room.id == participant.group.id %} selected 
+                                        {% endif %}>{{ room.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="col-12 text-center mt-3 mb-2">
+                        <button type="submit" class="btn btn-outline-primary">Add</button>
+                    </div>
+
+                </form>
+
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class=" mt-3 alert  {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-danger {% elif message.tags == 'warning' %} alert-warning {% endif %} alert-dismissible fade show"
+                    data-timeout="3000" role="alert">
+                    {{message}}
+                    <button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div> <!-- End row -->
+    </div> <!-- End container -->
+</section> <!-- End section -->
+
+
+{% endblock content %}
+
+
+{% block javascripts %}
+
+{% endblock javascripts %}

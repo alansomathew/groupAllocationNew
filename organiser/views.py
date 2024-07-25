@@ -141,7 +141,6 @@ def add_x_value(request, id):
         return render(request, 'organiser/x_value.html')
 
 
-
 def create_happiness_matrix(event_id):
     event = Event.objects.get(id=event_id)
     x_value = event.x_value
@@ -193,7 +192,7 @@ def display_event_details(request, event_id):
 def start_event(request, event_id):
     event = Event.objects.get(id=event_id)
     event.is_active = True
-    event.is_private=False
+    event.is_private = False
     event.save()
     messages.success(request, 'Event started successfully.')
     return redirect('display_event_details', event_id=event_id)
@@ -202,7 +201,7 @@ def start_event(request, event_id):
 def stop_event(request, event_id):
     event = Event.objects.get(id=event_id)
     event.is_active = False
-    event.is_private=True
+    event.is_private = True
     event.save()
     messages.success(request, 'Event stopped successfully.')
     return redirect('display_event_details', event_id=event_id)
@@ -290,6 +289,7 @@ def participants_interests(request, event_id):
     }
     return render(request, 'organiser/preference.html', context)
 
+
 def calculate_happiness_matrix_for_participants(participants, happiness_matrix, group_indices):
     participant_happiness_matrix = defaultdict(dict)
 
@@ -304,6 +304,20 @@ def calculate_happiness_matrix_for_participants(participants, happiness_matrix, 
 
     return participant_happiness_matrix
 
+
+def calculate_current_happiness(participants, happiness_matrix, group_index_map):
+    current_happiness = 0
+    for participant in participants:
+        if participant.group:
+            participant_group_idx = group_index_map[participant.group.id]
+            for interest in Interest.objects.filter(from_participant=participant, is_interested=True):
+                if interest.to_participant.group:
+                    to_group_idx = group_index_map[interest.to_participant.group.id]
+                    current_happiness += happiness_matrix[participant_group_idx][to_group_idx]
+    return current_happiness
+
+
+
 def solve_ilp(groups, participants, happiness_matrix):
     group_indices = {group.name: idx for idx, group in enumerate(groups)}
     participant_happiness_matrix = calculate_happiness_matrix_for_participants(participants, happiness_matrix, group_indices)
@@ -317,10 +331,10 @@ def solve_ilp(groups, participants, happiness_matrix):
 
     # Constraints
     for g in group_indices:
-        prob += lpSum(x[p, g] for p in participants) <= groups[group_indices[g]].capacity, f"Capacity_{g}"  # Capacity constraint
+        prob += lpSum(x[p, g] for p in participants) <= groups[group_indices[g]].capacity, f"Capacity_{g}"
 
     for p in participants:
-        prob += lpSum(x[p, g] for g in group_indices) == 1, f"Assignment_{p}"  # Each participant must be assigned to exactly one group
+        prob += lpSum(x[p, g] for g in group_indices) == 1, f"Assignment_{p}"
 
     # Solve the problem
     solver = PULP_CBC_CMD(msg=True)
@@ -335,7 +349,10 @@ def solve_ilp(groups, participants, happiness_matrix):
         else:
             allocation["not_allocated"].append(p)
 
-    return allocation
+    optimum_happiness = value(prob.objective)
+
+    return allocation, optimum_happiness
+
 
 def allocate_participants(request, event_id):
     event = Event.objects.get(id=event_id)
@@ -351,26 +368,89 @@ def allocate_participants(request, event_id):
         preferences = [interest.to_participant.name for interest in interests]
         participants[participant.name] = preferences
 
-    allocation = solve_ilp(groups, participants, happiness_matrix)
+    allocation, optimum_happiness = solve_ilp(groups, participants, happiness_matrix)
 
-    request.session['allocation'] = dict(allocation)  # Convert defaultdict to dict
-    allocation = request.session.get('allocation', {})
+    # Update participant groups
+    for group_name, participant_names in allocation.items():
+        group = Group.objects.get(name=group_name) if group_name != "not_allocated" else None
+        for participant_name in participant_names:
+            participant = Participant.objects.get(name=participant_name)
+            participant.group = group
+            participant.save()
 
-    context = {
-        'event': event,
-        'groups': groups,
-        'allocation': allocation,
-    }
-    return render(request, 'organiser/allocation_results.html', context)
+    print(optimum_happiness)
+
+    event.optimum_happiness = optimum_happiness
+    event.save()
+
+    messages.success(request, "Allocation completed successfully.")
+
+    return redirect('view_allocation', event_id=event_id)
+
 
 def view_allocation(request, event_id):
-    allocation = request.session.get('allocation', {})
     event = get_object_or_404(Event, id=event_id)
     groups = Group.objects.filter(level__event=event)
+    participants = Participant.objects.filter(event=event).select_related('group')
+    happiness_matrix = create_happiness_matrix(event_id)
+    
+    # Create a mapping from group IDs to matrix indices
+    group_index_map = {group.id: idx for idx, group in enumerate(groups)}
+    
+    current_happiness = calculate_current_happiness(participants, happiness_matrix, group_index_map)
 
     context = {
         'event': event,
         'groups': groups,
-        'allocation': allocation,
+        'participants': participants,
+        'optimum_happiness': event.optimum_happiness,
+        'current_happiness': current_happiness,
     }
     return render(request, 'organiser/allocation_results.html', context)
+
+
+
+def edit_allocation(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    groups = Group.objects.filter(level__event=event)
+    participants = Participant.objects.filter(event=event).select_related('group')
+
+    if request.method == 'POST':
+        new_allocations = {}
+        group_counts = {group.id: 0 for group in groups}
+
+        for participant in participants:
+            group_id = request.POST.get(f'group_{participant.id}')
+            if group_id:
+                group_id = int(group_id)
+                if group_id in new_allocations:
+                    new_allocations[group_id].append(participant)
+                else:
+                    new_allocations[group_id] = [participant]
+                group_counts[group_id] += 1
+
+        # Check for capacity issues
+        for group_id, count in group_counts.items():
+            group = Group.objects.get(id=group_id)
+            if count > group.capacity:
+                messages.warning(request, f"Group '{group.name}' capacity exceeded. Maximum capacity is {group.capacity}. Currently allocated: {count}.")
+
+        # Update the participants' group assignments
+        for participant in participants:
+            group_id = request.POST.get(f'group_{participant.id}')
+            if group_id:
+                group = Group.objects.get(id=int(group_id))
+                participant.group = group
+            else:
+                participant.group = None
+            participant.save()
+
+        messages.success(request, "Allocation updated successfully.")
+        return redirect('view_allocation', event_id=event_id)
+
+    context = {
+        'event': event,
+        'groups': groups,
+        'participants': participants,
+    }
+    return render(request, 'organiser/edit_allocation.html', context)
