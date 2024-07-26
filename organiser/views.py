@@ -293,16 +293,19 @@ def participants_interests(request, event_id):
 def calculate_happiness_matrix_for_participants(participants, happiness_matrix, group_indices):
     participant_happiness_matrix = defaultdict(dict)
 
-    for participant, prefs in participants.items():
-        for group in group_indices:
+    for participant in participants:
+        participant_id = participant.id
+        prefs = [interest.to_participant.id for interest in Interest.objects.filter(from_participant=participant, is_interested=True)]
+        for group_id in group_indices:
             happiness = 0
             for pref in prefs:
-                if pref in participants:
-                    preferred_group_index = group_indices[group]
-                    happiness += happiness_matrix[group_indices[group], preferred_group_index]
-            participant_happiness_matrix[participant][group] = happiness
+                if pref in participants.values_list('id', flat=True):
+                    preferred_group_index = group_indices[group_id]
+                    happiness += happiness_matrix[group_indices[group_id], preferred_group_index]
+            participant_happiness_matrix[participant_id][group_id] = happiness
 
     return participant_happiness_matrix
+
 
 
 def calculate_current_happiness(participants, happiness_matrix, group_index_map):
@@ -319,35 +322,41 @@ def calculate_current_happiness(participants, happiness_matrix, group_index_map)
 
 
 def solve_ilp(groups, participants, happiness_matrix):
-    group_indices = {group.name: idx for idx, group in enumerate(groups)}
+    group_indices = {group.id: idx for idx, group in enumerate(groups)}
     participant_happiness_matrix = calculate_happiness_matrix_for_participants(participants, happiness_matrix, group_indices)
 
     prob = LpProblem("Maximize_Happiness", LpMaximize)
 
-    x = LpVariable.dicts("x", ((p, g) for p in participants for g in group_indices), 0, 1, cat='Binary')
+    x = LpVariable.dicts("x", ((p.id, g) for p in participants for g in group_indices), 0, 1, cat='Binary')
 
     # Objective function
-    prob += lpSum(participant_happiness_matrix[p][g] * x[p, g] for p in participants for g in group_indices)
+    prob += lpSum(participant_happiness_matrix[p.id][g] * x[p.id, g] for p in participants for g in group_indices)
 
-    # Constraints
+    # Constraints: Capacity constraint
     for g in group_indices:
-        prob += lpSum(x[p, g] for p in participants) <= groups[group_indices[g]].capacity, f"Capacity_{g}"
+        prob += lpSum(x[p.id, g] for p in participants) <= groups.get(id=g).capacity, f"Capacity_{g}"
 
+    # Constraints: Each participant must be assigned to exactly one group
     for p in participants:
-        prob += lpSum(x[p, g] for g in group_indices) == 1, f"Assignment_{p}"
+        prob += lpSum(x[p.id, g] for g in group_indices) <= 1, f"Assignment_{p.id}"
 
     # Solve the problem
     solver = PULP_CBC_CMD(msg=True)
     prob.solve(solver)
 
     allocation = defaultdict(list)
+    not_allocated = []
     for p in participants:
+        assigned = False
         for g in group_indices:
-            if value(x[p, g]) == 1:
-                allocation[g].append(p)
-                break
-        else:
-            allocation["not_allocated"].append(p)
+            if value(x[p.id, g]) == 1:
+                if len(allocation[g]) < groups.get(id=g).capacity:
+                    allocation[g].append(p.id)
+                    assigned = True
+                    break
+        if not assigned:
+            not_allocated.append(p.id)
+    allocation["not_allocated"] = not_allocated
 
     optimum_happiness = value(prob.objective)
 
@@ -365,20 +374,18 @@ def allocate_participants(request, event_id):
     participants = {}
     for participant in participants_qs:
         interests = Interest.objects.filter(from_participant=participant, is_interested=True)
-        preferences = [interest.to_participant.name for interest in interests]
-        participants[participant.name] = preferences
+        preferences = [interest.to_participant.id for interest in interests]
+        participants[participant.id] = preferences
 
-    allocation, optimum_happiness = solve_ilp(groups, participants, happiness_matrix)
+    allocation, optimum_happiness = solve_ilp(groups, participants_qs, happiness_matrix)
 
     # Update participant groups
-    for group_name, participant_names in allocation.items():
-        group = Group.objects.get(name=group_name) if group_name != "not_allocated" else None
-        for participant_name in participant_names:
-            participant = Participant.objects.get(name=participant_name)
+    for group_id, participant_ids in allocation.items():
+        group = Group.objects.get(id=group_id) if group_id != "not_allocated" else None
+        for participant_id in participant_ids:
+            participant = Participant.objects.get(id=participant_id)
             participant.group = group
             participant.save()
-
-    print(optimum_happiness)
 
     event.optimum_happiness = optimum_happiness
     event.save()
