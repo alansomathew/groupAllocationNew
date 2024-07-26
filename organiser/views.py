@@ -400,11 +400,24 @@ def view_allocation(request, event_id):
     groups = Group.objects.filter(level__event=event)
     participants = Participant.objects.filter(event=event).select_related('group')
     happiness_matrix = create_happiness_matrix(event_id)
-    
+
     # Create a mapping from group IDs to matrix indices
     group_index_map = {group.id: idx for idx, group in enumerate(groups)}
     
     current_happiness = calculate_current_happiness(participants, happiness_matrix, group_index_map)
+
+    # Check group capacities
+    exceeded_capacity_messages = []
+    for group in groups:
+        allocated_count = participants.filter(group=group).count()
+        if allocated_count > group.capacity:
+            exceeded_capacity_messages.append(
+                f"Group '{group.name}' capacity exceeded. Maximum capacity is {group.capacity}. Currently allocated: {allocated_count}."
+            )
+
+    # Add capacity exceeded messages to Django messages framework
+    
+        
 
     context = {
         'event': event,
@@ -412,6 +425,7 @@ def view_allocation(request, event_id):
         'participants': participants,
         'optimum_happiness': event.optimum_happiness,
         'current_happiness': current_happiness,
+        'exceeded_capacity_messages': exceeded_capacity_messages,
     }
     return render(request, 'organiser/allocation_results.html', context)
 

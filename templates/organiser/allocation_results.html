@@ -70,9 +70,17 @@
                
 
                 <div class="mt-5">
-                    <span class="text-waring">Optimum Happiness: {{ optimum_happiness }}</span>
+                    <span class="text-waring">Maximum Happiness: {{ optimum_happiness }}</span>
                     <span class="text-danger">Current Happiness: {{ current_happiness }}</span>
                 </div>
+
+                {% if exceeded_capacity_messages %}
+                <div class="alert alert-warning" role="alert">
+                    {% for message in exceeded_capacity_messages %}
+                    <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
                 {% if messages %}
                 {% for message in messages %}
