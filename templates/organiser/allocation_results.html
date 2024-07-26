@@ -28,7 +28,7 @@
                     <thead>
                         <tr>
                             <th>Group</th>
-                            <th>Level</th>
+                            <!-- <th>Level</th> -->
                             <th>Capacity</th>
                         </tr>
                     </thead>
@@ -36,7 +36,7 @@
                         {% for group in groups %}
                         <tr>
                             <td>{{ group.name }}</td>
-                            <td>{{ group.level.name }}</td>
+                            <!-- <td>{{ group.level.name }}</td> -->
                             <td>{{ group.capacity }}</td>
                         </tr>
                         {% endfor %}
@@ -51,7 +51,7 @@
                         <tr>
                             <th>Participant</th>
                             <th>Group</th>
-                            <th>Level</th>
+                            <!-- <th>Level</th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -59,7 +59,7 @@
                         <tr>
                             <td>{{ participant.name }}</td>
                             <td>{{ participant.group.name }}</td>
-                            <td>{{ participant.group.level.name }}</td>
+                            <!-- <td>{{ participant.group.level.name }}</td> -->
                         </tr>
                         {% endfor %}
                     </tbody>
