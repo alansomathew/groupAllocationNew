@@ -394,6 +394,15 @@ def allocate_participants(request, event_id):
 
     return redirect('view_allocation', event_id=event_id)
 
+def calculate_individual_happiness(participant, happiness_matrix, group_index_map):
+    happiness = 0
+    if participant.group:
+        participant_group_idx = group_index_map[participant.group.id]
+        for interest in Interest.objects.filter(from_participant=participant, is_interested=True):
+            if interest.to_participant.group:
+                to_group_idx = group_index_map[interest.to_participant.group.id]
+                happiness += happiness_matrix[participant_group_idx][to_group_idx]
+    return happiness
 
 def view_allocation(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -406,6 +415,19 @@ def view_allocation(request, event_id):
     
     current_happiness = calculate_current_happiness(participants, happiness_matrix, group_index_map)
 
+    # Calculate individual happiness for each participant
+    individual_happiness = {}
+    for participant in participants:
+        happiness = 0
+        participant_group_idx = group_index_map.get(participant.group.id, None) if participant.group else None
+        if participant_group_idx is not None:
+            for interest in Interest.objects.filter(from_participant=participant, is_interested=True):
+                if interest.to_participant.group:
+                    to_group_idx = group_index_map.get(interest.to_participant.group.id, None)
+                    if to_group_idx is not None:
+                        happiness += float(happiness_matrix[participant_group_idx][to_group_idx])
+        individual_happiness[participant.id] = float(happiness)
+
     # Check group capacities
     exceeded_capacity_messages = []
     for group in groups:
@@ -415,10 +437,6 @@ def view_allocation(request, event_id):
                 f"Group '{group.name}' capacity exceeded. Maximum capacity is {group.capacity}. Currently allocated: {allocated_count}."
             )
 
-    # Add capacity exceeded messages to Django messages framework
-    
-        
-
     context = {
         'event': event,
         'groups': groups,
@@ -426,6 +444,7 @@ def view_allocation(request, event_id):
         'optimum_happiness': event.optimum_happiness,
         'current_happiness': current_happiness,
         'exceeded_capacity_messages': exceeded_capacity_messages,
+        'individual_happiness': individual_happiness,
     }
     return render(request, 'organiser/allocation_results.html', context)
 
